@@ -34,8 +34,8 @@ export default function Footer() {
         <div className="flex justify-center space-x-6 md:order-2">
           {navigation.map((item) => (
             <a
-              target='_blank'
-              rel='noopener noreferrer'
+              target="_blank"
+              rel="noopener noreferrer"
               key={item.name}
               href={item.href}
               className="text-gray-400 hover:text-gray-500"
@@ -60,8 +60,20 @@ export default function Footer() {
             }
             . All rights reserved.
           </p>
-          <p className="text-center text-xs leading-5 text-gray-900 font-bold mt-2">
+          <p className="mt-2 text-center text-xs font-bold leading-5 text-gray-900">
             Donations are welcome at ravonus.eth
+          </p>
+
+          <p className="mt-12 text-center text-xs font-bold leading-5 text-gray-900">
+            Banner By:{" "}
+            <a
+              className="text-blue-500 transition-colors duration-700 ease-in-out hover:text-blue-900"
+              href="https://twitter.com/R4vonus"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              @AdamGMcWilliam
+            </a>
           </p>
         </div>
       </div>
