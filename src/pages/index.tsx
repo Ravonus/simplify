@@ -1,11 +1,12 @@
 import Head from "next/head";
 import Link from "next/link";
-import React, { useState } from "react";
-import { api } from "~/utils/api";
+import React, { useEffect, useState } from "react";
 
 import ColorThief from "color-thief-ts";
 
-import  Vibrant  from "node-vibrant";
+
+import crypto from "crypto";
+import TwitterShare from '~/components/TwitterShare';
 
 
 
@@ -23,7 +24,48 @@ export default function Home() {
   );
   const [simplifiedDarkestColor, setSimplifiedDarkestColor] = useState<
     number[] | null
-  >(null);
+    >(null);
+  
+  const [publicId, setPublicId] = useState<string | null>(null);
+  
+  
+  useEffect(() => {
+    handleUploadToCloudinary().catch(console.error);
+  }, [simplifiedImageSrc]);
+
+
+  function generateHash(data : string) {
+    return crypto.createHash("sha256").update(data).digest("hex");
+  }
+  
+  const handleUploadToCloudinary = async () => {
+    if (!simplifiedImageSrc) return; // Ensure the source is available
+
+    const formData = new FormData();
+    const hash = generateHash(simplifiedImageSrc);
+    formData.append("file", simplifiedImageSrc);
+    formData.append("upload_preset", "jvddav02");
+    formData.append("public_id", hash);
+    //generate filename based on hash of image
+
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/doaxhxkmq/image/upload",
+        { method: "POST", body: formData }
+      );
+
+      const data = await response.json() as { secure_url: string, public_id: string };
+      const public_id = data.public_id;
+
+      setPublicId(public_id);
+
+
+      // You can use the secureUrl here, such as saving it to your server or updating the state
+    } catch (error) {
+      console.error("Failed to upload image", error);
+    }
+  };
+
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -44,10 +86,8 @@ export default function Home() {
             quality: 100,
             colorType: "array",
           } as const;
-          const tmpPalette = colorThief.getPalette(img, 7, opts );
+          const tmpPalette = colorThief.getPalette(img, 20, opts );
 
-          console.log(tmpPalette)
-    
           const mostDominantColor = colorThief.getColor(img, opts);
 
           const tmpPalette2 = colorThief.getPalette(img, 200, opts);
@@ -105,6 +145,7 @@ export default function Home() {
           // Update the image source with the new canvas data
        //   console.log(vibrant._src)
           setSimplifiedImageSrc(canvas.toDataURL());
+        //  handleUploadToCloudinary().catch(console.error);
         };
       }
     };
@@ -276,7 +317,7 @@ export default function Home() {
                       <img
                         src={imageSrc}
                         alt="Uploaded preview"
-                        className="h-full w-full rounded border object-contain shadow border border-black"
+                        className="h-full w-full rounded border border border-black object-contain shadow"
                       />
                     )}
                   </div>
@@ -330,7 +371,7 @@ export default function Home() {
                       <img
                         src={simplifiedImageSrc}
                         alt="Simplified preview"
-                        className="h-full w-full rounded border object-contain shadow border border-black"
+                        className="h-full w-full rounded border border border-black object-contain shadow"
                       />
                     )}
                   </div>
@@ -339,6 +380,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {publicId && <TwitterShare publicId={publicId} />}
       </main>
     </>
   );
