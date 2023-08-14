@@ -350,7 +350,7 @@ export default function Home() {
           content="Giving the NFT space their cognitive ability back."
         />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="/smplfy.png" />
+        <meta name="twitter:image" content="https://smplfy.world/smplfy.png" />
         <meta
           name="twitter:url"
           content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
@@ -360,8 +360,8 @@ export default function Home() {
           name="twitter:description"
           content="Giving the NFT space their cognitive ability back."
         />
-        <meta property="og:image" content="/smplfy.png" />
-        <meta property="og:url" content="https://smplfy.me/" />
+        <meta property="og:image" content="https://smplfy.world/smplfy.png" />
+        <meta property="og:url" content="https://smplfy.world/" />
         <meta property="og:title" content="Simplify" />
         <meta
           property="og:description"
