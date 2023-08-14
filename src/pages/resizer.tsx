@@ -504,7 +504,7 @@ export default function Home() {
         </div>
         {publicId && (
           <TwitterShare
-            publicId={publicId}
+            simplifiedImageSrc={simplifiedImageSrc ?? ""}
             title={title}
             contract={NFT.data?.contract}
             tokenId={NFT.data?.tokenId}

@@ -60,7 +60,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    handleUploadToCloudinary().catch(console.error);
+    //handleUploadToCloudinary().catch(console.error);
   }, [simplifiedImageSrc]);
 
   useEffect(() => {
@@ -87,10 +87,6 @@ export default function Home() {
     if (!address || !tokenId) return;
   }, [address, tokenId]);
 
-  function generateHash(data: string) {
-    return crypto.createHash("sha256").update(data).digest("hex");
-  }
-
   function handleImageToken(str: string) {
     if (timer) {
       clearTimeout(timer);
@@ -102,36 +98,6 @@ export default function Home() {
       }, 2000) // 2 seconds delay
     );
   }
-
-  const handleUploadToCloudinary = async () => {
-    if (!simplifiedImageSrc) return; // Ensure the source is available
-
-    const formData = new FormData();
-    const hash = generateHash(simplifiedImageSrc);
-    formData.append("file", simplifiedImageSrc);
-    formData.append("upload_preset", "jvddav02");
-    formData.append("public_id", hash);
-    //generate filename based on hash of image
-
-    try {
-      const response = await fetch(
-        "https://api.cloudinary.com/v1_1/doaxhxkmq/image/upload",
-        { method: "POST", body: formData }
-      );
-
-      const data = (await response.json()) as {
-        secure_url: string;
-        public_id: string;
-      };
-      const public_id = data.public_id;
-
-      setPublicId(public_id);
-
-      // You can use the secureUrl here, such as saving it to your server or updating the state
-    } catch (error) {
-      console.error("Failed to upload image", error);
-    }
-  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -600,9 +566,9 @@ export default function Home() {
             </div>
           </div>
         </div>
-        {publicId && (
+        {simplifiedImageSrc && (
           <TwitterShare
-            publicId={publicId}
+            simplifiedImageSrc={simplifiedImageSrc}
             title={title}
             contract={NFT.data?.contract}
             tokenId={NFT.data?.tokenId}
