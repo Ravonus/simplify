@@ -42,11 +42,13 @@ interface NFTDataResponse {
 const getNFTInput = z.object({
   tokenId: z.string(),
   address: z.string(),
+  isMatic: z.boolean().optional(),
 });
 
 const getRandomNFTFromReservoir = async (
   address: string,
-  tokenId: string
+  tokenId: string,
+  isMatic:boolean
 ): Promise<NFTDataResponse> => {
   if (address === "" || tokenId === "") {
     return {
@@ -61,7 +63,8 @@ const getRandomNFTFromReservoir = async (
   }
 
   try {
-    const url = `https://api.reservoir.tools/tokens/v6?tokens=${address}:${tokenId}`;
+
+    const url = `https://api${isMatic ? '-polygon':''}.reservoir.tools/tokens/v6?tokens=${address}:${tokenId}`;
 
     const res: MyResponse = await axios.get(url, {
       headers: {
@@ -88,8 +91,8 @@ const getRandomNFTFromReservoir = async (
 
 export const nftRouter = createTRPCRouter({
   getNFT: publicProcedure.input(getNFTInput).query(async ({ input }) => {
-    const { tokenId, address } = input;
-    const NFT = await getRandomNFTFromReservoir(address, tokenId);
+    const { tokenId, address, isMatic } = input;
+    const NFT = await getRandomNFTFromReservoir(address, tokenId, isMatic ?? false);
     return NFT;
   }),
 });

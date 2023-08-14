@@ -13,6 +13,8 @@ import Footer from '~/components/Footer';
 import Modal from '~/components/Modal';
 import NumberSlider from '~/components/NumberSlider';
 
+import smplfy from '~/public/smplfy.png';
+
 type RGBColor = [number, number, number];
 
 export default function Home() {
@@ -40,13 +42,15 @@ export default function Home() {
   const [address, setAddress] = useState<string>("");
   const [tokenId, setTokenId] = useState<string>("");
 
+  const [isMatic, setIsMatic] = useState<boolean>(false);
+
   const [title, setTitle] = useState<string>("");
 
   const [open, setOpen] = useState<boolean>(false);
 
   const [simplify, setSimplify] = useState<number>(9);
 
-  const NFT = api.nft.getNFT.useQuery({ address, tokenId });
+  const NFT = api.nft.getNFT.useQuery({ address, tokenId, isMatic });
 
   useEffect(() => {
     handleUploadToCloudinary().catch(console.error);
@@ -299,11 +303,18 @@ export default function Home() {
     const split = str.split("/");
     const address = split[split.length - 2];
     const token = split[split.length - 1];
+    const chain = split[split.length - 3];
+
+    console.log('chain', chain)
 
     if (!address || !token) return;
 
     setAddress(address);
     setTokenId(token);
+
+    if(chain === 'matic') {
+      setIsMatic(true);
+    }
 
   
   }
@@ -338,12 +349,33 @@ export default function Home() {
           name="description"
           content="Giving the NFT space their cognitive ability back."
         />
-        
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={smplfy.src} />
+        <meta
+          name="twitter:url"
+          content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
+        />
+        <meta name="twitter:title" content="Smplify" />
+        <meta
+          name="twitter:description"
+          content="Giving the NFT space their cognitive ability back."
+        />
+        <meta property="og:image" content={smplfy.src} />
+        <meta
+          property="og:url"
+          content="https://smplfy.me/"
+        />
+        <meta property="og:title" content="Simplify" />
+        <meta
+          property="og:description"
+          content="Giving the NFT space their cognitive ability back."
+        />
+
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Modal setOpen={setOpen} open={open} />
       <main className="flex flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc] sm:h-screen">
-        <img src="/smplfylogo.png" alt="logo" className="mt-1 -mb-12 w-32" />
+        <img src="/smplfylogo.png" alt="logo" className="-mb-12 mt-1 w-32" />
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
           <h1 className="text-5xl font-extrabold tracking-tight text-black sm:text-[5rem]">
             Simplify, Simplify, Simplify
