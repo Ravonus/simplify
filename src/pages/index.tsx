@@ -8,11 +8,9 @@ import ColorThief from "color-thief-ts";
 
 import crypto from "crypto";
 import TwitterShare from "~/components/TwitterShare";
-
-
+import Button from "~/components/Button";
 
 type RGBColor = [number, number, number];
-
 
 export default function Home() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -39,18 +37,17 @@ export default function Home() {
   const [address, setAddress] = useState<string>("");
   const [tokenId, setTokenId] = useState<string>("");
 
+  const [title, setTitle] = useState<string>("");
+
   const NFT = api.nft.getNFT.useQuery({ address, tokenId });
-
-
-
 
   useEffect(() => {
     handleUploadToCloudinary().catch(console.error);
   }, [simplifiedImageSrc]);
 
   useEffect(() => {
-    if (!NFT.data || NFT?.data?.name === '') return;
-    console.log(NFT.data.collection.name)
+    if (!NFT.data || NFT?.data?.name === "") return;
+    console.log(NFT.data.collection.name);
 
     setImageSrc(NFT.data.image);
 
@@ -59,51 +56,16 @@ export default function Home() {
     img.src = NFT.data.image;
 
     img.crossOrigin = "anonymous";
-
+    setTitle(NFT.data.collection.name);
     img.onload = () => {
-      //turn to base64
       grabColors(img);
-      // const canvas = document.createElement("canvas");
-      // canvas.width = img.width;
-      // canvas.height = img.height;
-      // const ctx = canvas.getContext("2d")!;
-      // ctx.drawImage(img, 0, 0);
-
-      // const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-      // const newImgData = new ImageData(imageData.data, img.width, img.height);
-
-      // const base64 = newImgData.data;
-
-      // const newImage = new Image();
-
-      // newImage.src = newImgData.data.toString();
-
-      // newImage.onload = () => {
-      //   grabColors(newImage);
-      // }
-
-      // Loading the image to extract the color
-
-     
-
-
-
     };
 
-
-    //set change event 
-    
+    //set change event
   }, [NFT.data]);
 
   useEffect(() => {
     if (!address || !tokenId) return;
-
-  
-
-
-
-    
   }, [address, tokenId]);
 
   function generateHash(data: string) {
@@ -165,7 +127,7 @@ export default function Home() {
         const img = new Image();
         img.src = reader.result;
         img.onload = () => {
-         grabColors(img);
+          grabColors(img);
         };
       }
     };
@@ -182,7 +144,7 @@ export default function Home() {
       quality: 100,
       colorType: "array",
     } as const;
-    console.log(img)
+    console.log(img);
     const tmpPalette = colorThief.getPalette(img, 9, opts);
 
     const mostDominantColor = colorThief.getColor(img, opts);
@@ -337,6 +299,13 @@ export default function Home() {
     console.log("handleImageChange", str);
   }
 
+  function download() {
+    if (!simplifiedImageSrc) return;
+    const link = document.createElement("a");
+    link.download = `${NFT.data?.name}-simplified-.png`;
+    link.href = simplifiedImageSrc;
+    link.click();
+  }
 
   return (
     <>
@@ -467,11 +436,16 @@ export default function Home() {
                   </div>
                   <div className="flex-grow">
                     {simplifiedImageSrc && (
-                      <img
-                        src={simplifiedImageSrc}
-                        alt="Simplified preview"
-                        className="h-full w-full rounded border border border-black object-contain shadow"
-                      />
+                      <div>
+                        <img
+                          src={simplifiedImageSrc}
+                          alt="Simplified preview"
+                          className="h-full w-full rounded border border border-black object-contain shadow"
+                        />
+                        <div className='flex justify-center mt-2'>
+                          <Button label="Download" onClick={download} />
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -479,7 +453,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        {publicId && <TwitterShare publicId={publicId} />}
+        {publicId && <TwitterShare publicId={publicId} title={title} />}
       </main>
     </>
   );
