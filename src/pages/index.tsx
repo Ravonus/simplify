@@ -2,15 +2,17 @@ import Head from "next/head";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
+import { api, type RouterOutputs } from "~/utils/api";
+
 import ColorThief from "color-thief-ts";
 
-
 import crypto from "crypto";
-import TwitterShare from '~/components/TwitterShare';
+import TwitterShare from "~/components/TwitterShare";
 
 
 
 type RGBColor = [number, number, number];
+
 
 export default function Home() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -24,20 +26,103 @@ export default function Home() {
   );
   const [simplifiedDarkestColor, setSimplifiedDarkestColor] = useState<
     number[] | null
-    >(null);
-  
+  >(null);
+
   const [publicId, setPublicId] = useState<string | null>(null);
-  
-  
+
+  const [isAddress, setIsAddress] = useState<boolean>(false);
+
+  const [timer, setTimer] = useState<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  const [address, setAddress] = useState<string>("");
+  const [tokenId, setTokenId] = useState<string>("");
+
+  const NFT = api.nft.getNFT.useQuery({ address, tokenId });
+
+
+
+
   useEffect(() => {
     handleUploadToCloudinary().catch(console.error);
   }, [simplifiedImageSrc]);
 
+  useEffect(() => {
+    if (!NFT.data || NFT?.data?.name === '') return;
+    console.log(NFT.data.collection.name)
 
-  function generateHash(data : string) {
+    setImageSrc(NFT.data.image);
+
+    const img = new Image();
+
+    img.src = NFT.data.image;
+
+    img.crossOrigin = "anonymous";
+
+    img.onload = () => {
+      //turn to base64
+      grabColors(img);
+      // const canvas = document.createElement("canvas");
+      // canvas.width = img.width;
+      // canvas.height = img.height;
+      // const ctx = canvas.getContext("2d")!;
+      // ctx.drawImage(img, 0, 0);
+
+      // const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      // const newImgData = new ImageData(imageData.data, img.width, img.height);
+
+      // const base64 = newImgData.data;
+
+      // const newImage = new Image();
+
+      // newImage.src = newImgData.data.toString();
+
+      // newImage.onload = () => {
+      //   grabColors(newImage);
+      // }
+
+      // Loading the image to extract the color
+
+     
+
+
+
+    };
+
+
+    //set change event 
+    
+  }, [NFT.data]);
+
+  useEffect(() => {
+    if (!address || !tokenId) return;
+
+  
+
+
+
+    
+  }, [address, tokenId]);
+
+  function generateHash(data: string) {
     return crypto.createHash("sha256").update(data).digest("hex");
   }
-  
+
+  function handleImageToken(str: string) {
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    setTimer(
+      setTimeout(() => {
+        setTokenId(str);
+        console.log("handleImageToken", str);
+      }, 2000) // 2 seconds delay
+    );
+  }
+
   const handleUploadToCloudinary = async () => {
     if (!simplifiedImageSrc) return; // Ensure the source is available
 
@@ -54,18 +139,19 @@ export default function Home() {
         { method: "POST", body: formData }
       );
 
-      const data = await response.json() as { secure_url: string, public_id: string };
+      const data = (await response.json()) as {
+        secure_url: string;
+        public_id: string;
+      };
       const public_id = data.public_id;
 
       setPublicId(public_id);
-
 
       // You can use the secureUrl here, such as saving it to your server or updating the state
     } catch (error) {
       console.error("Failed to upload image", error);
     }
   };
-
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -79,73 +165,7 @@ export default function Home() {
         const img = new Image();
         img.src = reader.result;
         img.onload = () => {
-
-          const colorThief = new ColorThief();
-
-          const opts = {
-            quality: 100,
-            colorType: "array",
-          } as const;
-          const tmpPalette = colorThief.getPalette(img, 20, opts );
-
-          const mostDominantColor = colorThief.getColor(img, opts);
-
-          const tmpPalette2 = colorThief.getPalette(img, 200, opts);
-
-          setPalette(tmpPalette2);
-          const darkestColor = findDarkestColor(tmpPalette2 as RGBColor[]);
-          setDarkestColor(darkestColor);
-          setSimplifiedPalette(tmpPalette);
-          const simplifiedDarkestColor = findDarkestColor(
-            tmpPalette as RGBColor[]
-          );
-          setSimplifiedDarkestColor(simplifiedDarkestColor);
-
-          // Create a canvas and draw the original image
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext("2d")!;
-          ctx.drawImage(img, 0, 0);
-
-          // Iterate through the pixels and replace with the closest palette color
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          for (let i = 0; i < imageData.data.length; i += 4) {
-            const originalColor: RGBColor = [
-              imageData.data[i]!,
-              imageData.data[i + 1]!,
-              imageData.data[i + 2]!,
-            ];
-
-            if (tmpPalette) {
-              // Check to make sure palette is defined
-
-              const containsColor = paletteContainsColor(
-                originalColor,
-                tmpPalette
-              );
-
-              if (
-                !containsColor &&
-                mostDominantColor.toString() !== originalColor.toString()
-              ) {
-                const closestColor = findClosestPaletteColor(
-                  originalColor,
-                  tmpPalette
-                );
-                if (!closestColor) continue; // Skip if no closest color found
-                imageData.data[i] = closestColor[0]!;
-                imageData.data[i + 1] = closestColor[1]!;
-                imageData.data[i + 2] = closestColor[2]!;
-              }
-            }
-          }
-          ctx.putImageData(imageData, 0, 0);
-
-          // Update the image source with the new canvas data
-       //   console.log(vibrant._src)
-          setSimplifiedImageSrc(canvas.toDataURL());
-        //  handleUploadToCloudinary().catch(console.error);
+         grabColors(img);
         };
       }
     };
@@ -155,33 +175,69 @@ export default function Home() {
     }
   };
 
-  function getUniqueColorsFromImage(img: HTMLImageElement): number[][] {
-    // Create a temporary canvas
+  function grabColors(img: HTMLImageElement) {
+    const colorThief = new ColorThief();
+
+    const opts = {
+      quality: 100,
+      colorType: "array",
+    } as const;
+    console.log(img)
+    const tmpPalette = colorThief.getPalette(img, 9, opts);
+
+    const mostDominantColor = colorThief.getColor(img, opts);
+
+    const tmpPalette2 = colorThief.getPalette(img, 200, opts);
+
+    setPalette(tmpPalette2);
+    const darkestColor = findDarkestColor(tmpPalette2 as RGBColor[]);
+    setDarkestColor(darkestColor);
+    setSimplifiedPalette(tmpPalette);
+    const simplifiedDarkestColor = findDarkestColor(tmpPalette as RGBColor[]);
+    setSimplifiedDarkestColor(simplifiedDarkestColor);
+
+    // Create a canvas and draw the original image
     const canvas = document.createElement("canvas");
     canvas.width = img.width;
     canvas.height = img.height;
     const ctx = canvas.getContext("2d")!;
-
-    // Draw the image onto the canvas
     ctx.drawImage(img, 0, 0);
 
-    // Extract the image data
+    // Iterate through the pixels and replace with the closest palette color
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const uniqueColors = new Set<string>();
-
-    // Iterate through the pixels and collect unique colors
     for (let i = 0; i < imageData.data.length; i += 4) {
-      const color: RGBColor = [
+      const originalColor: RGBColor = [
         imageData.data[i]!,
         imageData.data[i + 1]!,
         imageData.data[i + 2]!,
       ];
-      uniqueColors.add(color.join(","));
-    }
 
-    return Array.from(uniqueColors).map((colorString) =>
-      colorString.split(",").map(Number)
-    );
+      if (tmpPalette) {
+        // Check to make sure palette is defined
+
+        const containsColor = paletteContainsColor(originalColor, tmpPalette);
+
+        if (
+          !containsColor &&
+          mostDominantColor.toString() !== originalColor.toString()
+        ) {
+          const closestColor = findClosestPaletteColor(
+            originalColor,
+            tmpPalette
+          );
+          if (!closestColor) continue; // Skip if no closest color found
+          imageData.data[i] = closestColor[0]!;
+          imageData.data[i + 1] = closestColor[1]!;
+          imageData.data[i + 2] = closestColor[2]!;
+        }
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    // Update the image source with the new canvas data
+    //   console.log(vibrant._src)
+    setSimplifiedImageSrc(canvas.toDataURL());
+    //  handleUploadToCloudinary().catch(console.error);
   }
 
   function paletteContainsColor(color: RGBColor, palette: number[][]): boolean {
@@ -256,6 +312,32 @@ export default function Home() {
     return darkestColor;
   }
 
+  function handleImageChange(str: string) {
+    if (str.length < 42) return;
+
+    if (str.length === 42) {
+      //address
+      if (str.includes("0x")) {
+        setIsAddress(true);
+        setAddress(str);
+      }
+    }
+
+    //grab address and token from opensea url https://opensea.io/assets/ethereum/0x02e9b2389156ee8ed963b1341a69d5f54ada4d82/938
+
+    const split = str.split("/");
+    const address = split[split.length - 2];
+    const token = split[split.length - 1];
+
+    if (!address || !token) return;
+
+    setAddress(address);
+    setTokenId(token);
+
+    console.log("handleImageChange", str);
+  }
+
+
   return (
     <>
       <Head>
@@ -269,12 +351,28 @@ export default function Home() {
             Simplify, Simplify, Simplify
           </h1>
           <input
-            className="mb-12 items-center justify-center rounded-md border border-black"
+            className="items-center justify-center rounded-md border border-black"
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
+            id="fileUpload"
+            hidden
           />
 
+          <input
+            type="text"
+            className="items-center justify-center rounded-md border border-black"
+            placeholder="Opensea URL - Contract"
+            onChange={(e) => handleImageChange(e.target.value)}
+          />
+          {isAddress && (
+            <input
+              type="text"
+              className="items-center justify-center rounded-md border border-black"
+              placeholder="Token ID"
+              onChange={(e) => handleImageToken(e.target.value)}
+            />
+          )}
           <div className="flex">
             <div className="flex flex-col sm:flex-row">
               <div>
@@ -315,6 +413,7 @@ export default function Home() {
                   <div className="flex-grow">
                     {imageSrc && (
                       <img
+                        id="unchangedImg"
                         src={imageSrc}
                         alt="Uploaded preview"
                         className="h-full w-full rounded border border border-black object-contain shadow"
