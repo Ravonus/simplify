@@ -53,7 +53,9 @@ export default function Modal({ open, setOpen }: ModalProps) {
                     <div className="mt-2">
                       <p className="mt-2 text-sm text-gray-500">
                         {`In a world consumed by colors `}
-                          <span className='text-blue-500 font-bold'>Team Simplifi</span>
+                        <span className="font-bold text-blue-500">
+                          Team Smplify
+                        </span>
                         {` has
                         discovered: you lose brain power when viewing art with
                         too many hues! Our scientific studies show that "the

@@ -58,27 +58,44 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl }) => {
   return (
     <div>
       <Head>
+        <title>Smplify</title>
+        <meta
+          name="description"
+          content="Giving the NFT space their cognitive ability back."
+        />
+
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content={imageUrl} />
         <meta
           name="twitter:url"
           content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
         />
-        <meta name="twitter:title" content="Simplify" />
-        <meta name="twitter:description" content="An NFT Simplifier." />
+        <meta name="twitter:title" content="Smplify" />
+        <meta
+          name="twitter:description"
+          content="Giving the NFT space their cognitive ability back."
+        />
         <meta property="og:image" content={`${imageUrl}.png`} />
         <meta
           property="og:url"
           content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
         />
         <meta property="og:title" content="Simplify" />
-        <meta property="og:description" content="An NFT Simplifier." />
+        <meta
+          property="og:description"
+          content="Giving the NFT space their cognitive ability back."
+        />
 
         {/* Other meta tags as needed */}
       </Head>
       <main className="flex h-screen flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
-          <Link className="m-4 text-center text-4xl font-bold transition duration-700 mouse-cursor hover:text-blue-500" href="/">Simplify</Link>
+          <Link
+            className="mouse-cursor m-4 text-center text-4xl font-bold transition duration-700 hover:text-blue-500"
+            href="/"
+          >
+            Simplify
+          </Link>
           <h2 className="m-3 text-center text-2xl font-bold">
             {NFT.data?.collection.name}
           </h2>

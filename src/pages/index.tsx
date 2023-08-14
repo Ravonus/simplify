@@ -333,15 +333,16 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Simplifi</title>
+        <title>Smplify</title>
         <meta
           name="description"
           content="Giving the NFT space their cognitive ability back."
         />
+        
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Modal setOpen={setOpen} open={open} />
-      <main className="flex sm:h-screen flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
+      <main className="flex flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc] sm:h-screen">
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
           <h1 className="text-5xl font-extrabold tracking-tight text-black sm:text-[5rem]">
             Simplify, Simplify, Simplify
