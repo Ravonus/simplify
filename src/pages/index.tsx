@@ -369,7 +369,7 @@ export default function Home() {
       <main className="flex flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc] sm:h-screen">
         <img src="/smplfylogo.png" alt="logo" className="-mb-12 mt-1 w-32" />
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
-          <h1 className="text-5xl font-extrabold tracking-tight text-black sm:text-[5rem]">
+          <h1 className="text-5xl font-extrabold tracking-tight text-black sm:text-[5rem] justify-center text-center">
             Simplify, Simplify, Simplify
           </h1>
           <Button label="Manifesto" onClick={() => setOpen(!open)} />
@@ -396,13 +396,14 @@ export default function Home() {
               onChange={(e) => handleImageToken(e.target.value)}
             />
           )}
-          <div className="flex">
+
+          <div className="flex ">
             <div className="flex flex-col sm:flex-row">
               <div>
                 {darkestColor && (
-                  <div className="flex-none px-1">
+                  <div className="-mb-[20px] ml-20 flex-none sm:ml-0">
                     <div
-                      className="-mb-5 border border-black"
+                      className="border border-black"
                       style={{
                         backgroundColor: rgbToHex(darkestColor),
                         width: "20px",
@@ -411,14 +412,15 @@ export default function Home() {
                     />
                   </div>
                 )}
-                <div className="block items-start sm:flex">
-                  <div className="flex-none px-1">
+                <div className="flex flex-col sm:flex-row">
+                  <div className="sm:flex-none sm:pr-2">
                     {palette && (
-                      <div className="mt-12 grid grid-cols-2 grid-rows-2 gap-0">
-                        {palette.map(
-                          (color, index) =>
+                      <div className="flex flex-col  ">
+                        <div className="flex justify-center sm:hidden">
+                          {palette.map((color, index) =>
+                            index % 2 === 0 &&
                             darkestColor &&
-                            color.toString() !== darkestColor.toString() && (
+                            color.toString() !== darkestColor.toString() ? (
                               <div
                                 key={index}
                                 className="border border-black"
@@ -428,20 +430,54 @@ export default function Home() {
                                   height: "20px",
                                 }}
                               />
-                            )
-                        )}
+                            ) : null
+                          )}
+                        </div>
+                        <div className="mb-1 flex justify-center sm:hidden">
+                          {palette.map((color, index) =>
+                            index % 2 !== 0 &&
+                            darkestColor &&
+                            color.toString() !== darkestColor.toString() ? (
+                              <div
+                                key={index}
+                                className="border border-black"
+                                style={{
+                                  backgroundColor: rgbToHex(color),
+                                  width: "20px",
+                                  height: "20px",
+                                }}
+                              />
+                            ) : null
+                          )}
+                        </div>
+                        <div className="mt-8 hidden grid-cols-2 grid-rows-2 gap-0 sm:grid">
+                          {palette.map(
+                            (color, index) =>
+                              darkestColor &&
+                              color.toString() !== darkestColor.toString() && (
+                                <div
+                                  key={index}
+                                  className="border border-black"
+                                  style={{
+                                    backgroundColor: rgbToHex(color),
+                                    width: "20px",
+                                    height: "20px",
+                                  }}
+                                />
+                              )
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
                   <div className="flex-grow">
                     {imageSrc && (
                       <div
-                        className="relative flex"
-                        style={{ minWidth: "500px", minHeight: "500px" }}
+                        className="relative flex h-screen w-screen"
+                        style={{ maxWidth: "500px", maxHeight: "500px" }}
                       >
                         <div className="absolute h-full w-full rounded bg-white" />
                         <img
-                          style={{ minWidth: "500px", minHeight: "500px" }}
                           id="unchangedImg"
                           src={imageSrc}
                           alt="Uploaded preview"
@@ -461,9 +497,9 @@ export default function Home() {
               <div>
                 {/* Simplified image and palette code */}
                 {simplifiedDarkestColor && (
-                  <div className="flex-none px-1">
+                  <div className="-mb-[20px] ml-32 flex-none sm:ml-1">
                     <div
-                      className="-mb-5 border border-black"
+                      className="border border-black"
                       style={{
                         backgroundColor: rgbToHex(simplifiedDarkestColor),
                         width: "20px",
@@ -473,14 +509,15 @@ export default function Home() {
                   </div>
                 )}
                 <div className="block items-start sm:flex">
-                  <div className="flex-none px-1">
+                  <div className="flex-none px-1 sm:pr-2">
                     {simplifiedPalette && (
-                      <div className="mt-12 grid grid-cols-2 grid-rows-2 gap-0">
-                        {simplifiedPalette.map(
-                          (color, index) =>
+                      <div className="flex flex-col">
+                        <div className="flex justify-center sm:hidden">
+                          {simplifiedPalette.map((color, index) =>
+                            index % 2 === 0 &&
                             simplifiedDarkestColor &&
                             color.toString() !==
-                              simplifiedDarkestColor.toString() && (
+                              simplifiedDarkestColor.toString() ? (
                               <div
                                 key={index}
                                 className="border border-black"
@@ -490,8 +527,45 @@ export default function Home() {
                                   height: "20px",
                                 }}
                               />
-                            )
-                        )}
+                            ) : null
+                          )}
+                        </div>
+                        <div className="mb-1 flex justify-center sm:hidden">
+                          {simplifiedPalette.map((color, index) =>
+                            index % 2 !== 0 &&
+                            simplifiedDarkestColor &&
+                            color.toString() !==
+                              simplifiedDarkestColor.toString() ? (
+                              <div
+                                key={index}
+                                className="border border-black"
+                                style={{
+                                  backgroundColor: rgbToHex(color),
+                                  width: "20px",
+                                  height: "20px",
+                                }}
+                              />
+                            ) : null
+                          )}
+                        </div>
+                        <div className="mt-8 hidden grid-cols-2 grid-rows-2 gap-0 sm:grid">
+                          {simplifiedPalette.map(
+                            (color, index) =>
+                              simplifiedDarkestColor &&
+                              color.toString() !==
+                                simplifiedDarkestColor.toString() && (
+                                <div
+                                  key={index}
+                                  className="border border-black"
+                                  style={{
+                                    backgroundColor: rgbToHex(color),
+                                    width: "20px",
+                                    height: "20px",
+                                  }}
+                                />
+                              )
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -505,12 +579,11 @@ export default function Home() {
                           />
                         </div>
                         <div
-                          className="image-rendering-pixelated relative flex"
-                          style={{ minWidth: "500px", minHeight: "500px" }}
+                          className="relative flex h-screen w-screen"
+                          style={{ maxWidth: "500px", maxHeight: "500px" }}
                         >
                           <div className="absolute h-full w-full rounded bg-white " />
                           <img
-                            style={{ minWidth: "500px", minHeight: "500px" }}
                             src={simplifiedImageSrc}
                             alt="Simplified preview"
                             className="absolute z-50 h-full w-full cursor-pointer rounded border border border-black object-contain shadow"
