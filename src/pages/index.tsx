@@ -435,13 +435,19 @@ export default function Home() {
                   </div>
                   <div className="flex-grow">
                     {imageSrc && (
-                      <img
+                      <div
+                        className="relative flex"
                         style={{ minWidth: "500px", minHeight: "500px" }}
-                        id="unchangedImg"
-                        src={imageSrc}
-                        alt="Uploaded preview"
-                        className="h-full w-full rounded border border border-black object-contain shadow"
-                      />
+                      >
+                        <div className="absolute h-full w-full rounded bg-white" />
+                        <img
+                          style={{ minWidth: "500px", minHeight: "500px" }}
+                          id="unchangedImg"
+                          src={imageSrc}
+                          alt="Uploaded preview"
+                          className="absolute h-full w-full rounded border border-black object-contain shadow"
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -498,12 +504,18 @@ export default function Home() {
                             setSimplify={changeSimplify}
                           />
                         </div>
-                        <img
+                        <div
+                          className="relative flex"
                           style={{ minWidth: "500px", minHeight: "500px" }}
-                          src={simplifiedImageSrc}
-                          alt="Simplified preview"
-                          className="h-full w-full rounded border border border-black object-contain shadow"
-                        />
+                        >
+                          <div className="absolute h-full w-full rounded bg-white" />
+                          <img
+                            style={{ minWidth: "500px", minHeight: "500px" }}
+                            src={simplifiedImageSrc}
+                            alt="Simplified preview"
+                            className="h-full w-full rounded border border border-black object-contain shadow cursor-pointer absolute z-50" 
+                          />
+                        </div>
                         <div className="mt-2 flex justify-center">
                           <Button label="Download" onClick={download} />
                         </div>

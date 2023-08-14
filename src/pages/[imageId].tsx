@@ -125,11 +125,11 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
 
         {/* Other meta tags as needed */}
       </Head>
-      <main className="flex sm:h-100 h-min-screen  flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
-        <img src={NFT?.image} alt="cache"  hidden/>
+      <main className="sm:h-100 h-min-screen flex  flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
+        <img src={NFT?.image} alt="cache" hidden />
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
           <Link
-            className="mouse-cursor m-4 text-center text-4xl font-bold transition duration-700 hover:text-blue-500 hover:scale-105 hover:rotate-6 transform" 
+            className="mouse-cursor m-4 transform text-center text-4xl font-bold transition duration-700 hover:rotate-6 hover:scale-105 hover:text-blue-500"
             href="/"
           >
             <img
@@ -142,27 +142,32 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
             {NFT?.collection.name}
           </h2>
           <div className="flex items-center justify-center">
-            <a
-              href={`https://opensea.io/assets/ethereum/${contract}/${tokenId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onMouseEnter={changeImg}
-              onMouseLeave={removeImg}
-              onTouchEnd={removeImg}
-              onTouchStart={changeImg}
+            <div
+              className="relative flex group"
+              style={{ minWidth: "500px", minHeight: "500px" }}
             >
-              <Image
-                id="preview"
-                src={newSrc ?? imageUrl}
-                alt="NFT"
-                width={500}
-                height={500}
-                className="duration-1000 hover:scale-105"
-                placeholder='blur'
-                blurDataURL={imageUrl}
-
-              />
-            </a>
+              <div className="absolute h-full w-full rounded bg-white group-hover:scale-105 duration-1000" />
+              <a
+                href={`https://opensea.io/assets/ethereum/${contract}/${tokenId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onMouseEnter={changeImg}
+                onMouseLeave={removeImg}
+                onTouchEnd={removeImg}
+                onTouchStart={changeImg}
+              >
+                <Image
+                  id="preview"
+                  src={newSrc ?? imageUrl}
+                  alt="NFT"
+                  width={500}
+                  height={500}
+                  className="absolute rounded border border border-black duration-1000 group-hover:scale-105 shadow"
+                  placeholder="blur"
+                  blurDataURL={imageUrl}
+                />
+              </a>
+            </div>
           </div>
           <h2 className="m-2 text-center text-2xl font-bold">
             #{NFT?.tokenId}
