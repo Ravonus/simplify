@@ -1,7 +1,9 @@
 import { type GetServerSideProps } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import Link from 'next/link';
 import { useEffect, useState } from "react";
+import Footer from '~/components/Footer';
 
 import { api } from "~/utils/api";
 
@@ -74,9 +76,9 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl }) => {
 
         {/* Other meta tags as needed */}
       </Head>
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
-        <div className="flex flex-col items-center justify-center">
-          <h1 className="m-4 text-center text-4xl font-bold">Simplify</h1>
+      <main className="flex h-screen flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
+        <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
+          <Link className="m-4 text-center text-4xl font-bold transition duration-700 mouse-cursor hover:text-blue-500" href="/">Simplify</Link>
           <h2 className="m-3 text-center text-2xl font-bold">
             {NFT.data?.collection.name}
           </h2>
@@ -102,6 +104,10 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl }) => {
           <h2 className="m-2 text-center text-2xl font-bold">
             #{NFT.data?.tokenId}
           </h2>
+        </div>
+        <div className="h-screen" />
+        <div className="container gap-8 px-4 py-8">
+          <Footer />
         </div>
       </main>
     </div>

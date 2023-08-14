@@ -51,7 +51,6 @@ export default function Home() {
 
   useEffect(() => {
     if (!NFT.data || NFT?.data?.name === "") return;
-    console.log(NFT.data.collection.name);
 
     setImageSrc(NFT.data.image);
 
@@ -84,7 +83,7 @@ export default function Home() {
     setTimer(
       setTimeout(() => {
         setTokenId(str);
-        console.log("handleImageToken", str);
+
       }, 2000) // 2 seconds delay
     );
   }
@@ -148,7 +147,7 @@ export default function Home() {
       quality: 100,
       colorType: "array",
     } as const;
-    console.log(img);
+
     const tmpPalette = colorThief.getPalette(img, 9, opts);
 
     const mostDominantColor = colorThief.getColor(img, opts);
@@ -201,9 +200,9 @@ export default function Home() {
     ctx.putImageData(imageData, 0, 0);
 
     // Update the image source with the new canvas data
-    //   console.log(vibrant._src)
+
     setSimplifiedImageSrc(canvas.toDataURL());
-    //  handleUploadToCloudinary().catch(console.error);
+
   }
 
   function paletteContainsColor(color: RGBColor, palette: number[][]): boolean {
@@ -300,7 +299,7 @@ export default function Home() {
     setAddress(address);
     setTokenId(token);
 
-    console.log("handleImageChange", str);
+  
   }
 
   function download() {
