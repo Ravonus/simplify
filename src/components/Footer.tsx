@@ -46,7 +46,18 @@ export default function Footer() {
           ))}
         </div>
         <div className="mt-8 md:order-1 md:mt-0">
-          <p className="text-center text-xs leading-5 text-gray-500">
+          <p className="mb-4 text-center text-xs leading-5 text-gray-500">
+            Banner By:{" "}
+            <a
+              className="text-blue-300 transition-colors duration-700 ease-in-out hover:text-blue-900"
+              href="https://twitter.com/R4vonus"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              @AdamGMcWilliam
+            </a>
+          </p>
+          <p className="text-bold text-center text-xs leading-5 text-gray-500">
             &copy; 2023{" "}
             {
               <a
@@ -62,18 +73,6 @@ export default function Footer() {
           </p>
           <p className="mt-2 text-center text-xs font-bold leading-5 text-gray-900">
             Donations are welcome at ravonus.eth
-          </p>
-
-          <p className="mt-12 text-center text-xs font-bold leading-5 text-gray-900">
-            Banner By:{" "}
-            <a
-              className="text-blue-500 transition-colors duration-700 ease-in-out hover:text-blue-900"
-              href="https://twitter.com/R4vonus"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              @AdamGMcWilliam
-            </a>
           </p>
         </div>
       </div>
