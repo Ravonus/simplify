@@ -11,6 +11,7 @@ import TwitterShare from "~/components/TwitterShare";
 import Button from "~/components/Button";
 import Footer from '~/components/Footer';
 import Modal from '~/components/Modal';
+import NumberSlider from '~/components/NumberSlider';
 
 type RGBColor = [number, number, number];
 
@@ -43,6 +44,8 @@ export default function Home() {
 
   const [open, setOpen] = useState<boolean>(false);
 
+  const [simplify, setSimplify] = useState<number>(9);
+
   const NFT = api.nft.getNFT.useQuery({ address, tokenId });
 
   useEffect(() => {
@@ -58,19 +61,13 @@ export default function Home() {
 
     const img = new Image();
 
-    //force 500x500 even if svg
-
-    
-
-
 
     img.src = NFT.data.image;
-
 
     img.crossOrigin = "anonymous";
     setTitle(NFT.data.collection.name);
     img.onload = () => {
-      grabColors(img);
+      grabColors(img, simplify);
     };
 
     //set change event
@@ -139,7 +136,7 @@ export default function Home() {
         const img = new Image();
         img.src = reader.result;
         img.onload = () => {
-          grabColors(img);
+          grabColors(img, simplify);
         };
       }
     };
@@ -149,7 +146,7 @@ export default function Home() {
     }
   };
 
-  function grabColors(img: HTMLImageElement) {
+  function grabColors(img: HTMLImageElement, count:number) {
     const colorThief = new ColorThief();
 
     const opts = {
@@ -157,7 +154,7 @@ export default function Home() {
       colorType: "array",
     } as const;
 
-    const tmpPalette = colorThief.getPalette(img, 9, opts);
+    const tmpPalette = colorThief.getPalette(img, count, opts);
 
     const mostDominantColor = colorThief.getColor(img, opts);
 
@@ -319,6 +316,20 @@ export default function Home() {
     link.click();
   }
 
+  function changeSimplify(num: number) {
+    setSimplify(num);
+    if (imageSrc) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = imageSrc
+      img.onload = () =>
+        grabColors(img, num);
+      
+    }
+
+  }
+
+
   return (
     <>
       <Head>
@@ -455,6 +466,9 @@ export default function Home() {
                   <div className="flex-grow">
                     {simplifiedImageSrc && (
                       <div>
+                        <div className='-mt-[60px]'>
+                          <NumberSlider simplify={simplify} setSimplify={changeSimplify} />
+                          </div>
                         <img
                           style={{ minWidth: "500px", minHeight: "500px" }}
                           src={simplifiedImageSrc}
