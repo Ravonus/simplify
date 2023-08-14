@@ -89,10 +89,10 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
           name="twitter:url"
           content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
         />
-        <meta name="twitter:title" content={`Smplify # ${NFT?.tokenId}`} />
+        <meta name="twitter:title" content={`Smplify ${NFT?.collection.name} #${NFT?.tokenId}`} />
         <meta
           name="twitter:description"
-          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT?.collection.name} NFT with smplfy`}
+          content={`Giving the NFT space their cognitive ability back. Converted my ${NFT?.collection.name} NFT with smplfy`}
         />
         <meta property="og:image" content={`${imageUrl}.png`} />
         <meta
@@ -101,11 +101,11 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
         />
         <meta
           property="og:title"
-          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT?.collection.name} NFT with smplfy`}
+          content={`Giving the NFT space their cognitive ability back. Converted my ${NFT?.collection.name} NFT with smplfy`}
         />
         <meta
           property="og:description"
-          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT?.collection.name} NFT with smplfy`}
+          content={`Giving the NFT space their cognitive ability back. Converted my ${NFT?.collection.name} NFT with smplfy`}
         />
 
         {/* Other meta tags as needed */}
