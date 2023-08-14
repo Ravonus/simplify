@@ -309,16 +309,16 @@ export default function Home() {
     const token = split[split.length - 1];
     const chain = split[split.length - 3];
 
-    console.log("chain", chain);
-
     if (!address || !token) return;
-
-    setAddress(address);
-    setTokenId(token);
 
     if (chain === "matic") {
       setIsMatic(true);
     }
+
+    setAddress(address);
+    setTokenId(token);
+
+    grabColors(new Image(), simplify);
   }
 
   function download() {
@@ -513,7 +513,7 @@ export default function Home() {
                             style={{ minWidth: "500px", minHeight: "500px" }}
                             src={simplifiedImageSrc}
                             alt="Simplified preview"
-                            className="h-full w-full rounded border border border-black object-contain shadow cursor-pointer absolute z-50" 
+                            className="absolute z-50 h-full w-full cursor-pointer rounded border border border-black object-contain shadow"
                           />
                         </div>
                         <div className="mt-2 flex justify-center">
