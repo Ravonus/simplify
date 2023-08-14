@@ -341,7 +341,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Modal setOpen={setOpen} open={open} />
-      <main className="flex h-screen flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
+      <main className="flex sm:h-screen flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
           <h1 className="text-5xl font-extrabold tracking-tight text-black sm:text-[5rem]">
             Simplify, Simplify, Simplify
@@ -385,7 +385,7 @@ export default function Home() {
                     />
                   </div>
                 )}
-                <div className="flex items-start">
+                <div className="block items-start sm:flex">
                   <div className="flex-none px-1">
                     {palette && (
                       <div className="mt-12 grid grid-cols-2 grid-rows-2 gap-0">
@@ -440,7 +440,7 @@ export default function Home() {
                     />
                   </div>
                 )}
-                <div className="flex items-start">
+                <div className="block items-start sm:flex">
                   <div className="flex-none px-1">
                     {simplifiedPalette && (
                       <div className="mt-12 grid grid-cols-2 grid-rows-2 gap-0">
@@ -466,9 +466,12 @@ export default function Home() {
                   <div className="flex-grow">
                     {simplifiedImageSrc && (
                       <div>
-                        <div className='-mt-[60px]'>
-                          <NumberSlider simplify={simplify} setSimplify={changeSimplify} />
-                          </div>
+                        <div className="-mt-0 sm:-mt-[60px]">
+                          <NumberSlider
+                            simplify={simplify}
+                            setSimplify={changeSimplify}
+                          />
+                        </div>
                         <img
                           style={{ minWidth: "500px", minHeight: "500px" }}
                           src={simplifiedImageSrc}
@@ -494,7 +497,7 @@ export default function Home() {
             tokenId={NFT.data?.tokenId}
           />
         )}
-        <div className="h-screen" />
+        <div className="sm:h-screen" />
         <div className="container gap-8 px-4 py-8">
           <Footer />
         </div>
