@@ -159,7 +159,7 @@ export default function Home() {
     const colorThief = new ColorThief();
 
     const opts = {
-      quality: 100,
+      quality: 0,
       colorType: "array",
     } as const;
 
@@ -318,7 +318,7 @@ export default function Home() {
     setAddress(address);
     setTokenId(token);
 
-    grabColors(new Image(), simplify);
+    //grabColors(new Image(), simplify);
   }
 
   function download() {
@@ -505,10 +505,10 @@ export default function Home() {
                           />
                         </div>
                         <div
-                          className="relative flex"
+                          className="image-rendering-pixelated relative flex"
                           style={{ minWidth: "500px", minHeight: "500px" }}
                         >
-                          <div className="absolute h-full w-full rounded bg-white" />
+                          <div className="absolute h-full w-full rounded bg-white " />
                           <img
                             style={{ minWidth: "500px", minHeight: "500px" }}
                             src={simplifiedImageSrc}
