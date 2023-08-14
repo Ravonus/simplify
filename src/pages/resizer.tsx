@@ -9,8 +9,8 @@ import ColorThief from "color-thief-ts";
 import crypto from "crypto";
 import TwitterShare from "~/components/TwitterShare";
 import Button from "~/components/Button";
-import Footer from '~/components/Footer';
-import Modal from '~/components/Modal';
+import Footer from "~/components/Footer";
+import Modal from "~/components/Modal";
 
 type RGBColor = [number, number, number];
 
@@ -52,32 +52,32 @@ export default function Home() {
   useEffect(() => {
     if (!NFT.data || NFT?.data?.name === "") return;
 
-    console.log("NFT", NFT.data)
+    //inline async function
+    (async () => {
+      console.log("RUNS", NFT.data.image);
+      const img = (await resizeImage(
+        NFT.data.image,
+        500,
+        500
+      )) as HTMLImageElement;
 
-    setImageSrc(NFT.data.image);
+      // //force 500x500 even if svg
 
-    const img = new Image();
+      // img.src = NFT.data.image;
 
-    //force 500x500 even if svg
+      img.crossOrigin = "anonymous";
+      setTitle(NFT.data.collection.name);
 
-    
-
-
-
-    img.src = NFT.data.image;
-
-
-    img.crossOrigin = "anonymous";
-    setTitle(NFT.data.collection.name);
-    img.onload = () => {
-      grabColors(img);
-    };
+      img.onload = () => {
+        grabColors(img);
+      };
+    })().catch(console.error);
 
     //set change event
   }, [NFT.data]);
 
   useEffect(() => {
-    if (!address || !tokenId) return;
+    //
   }, [address, tokenId]);
 
   function generateHash(data: string) {
@@ -92,11 +92,39 @@ export default function Home() {
     setTimer(
       setTimeout(() => {
         setTokenId(str);
-
       }, 2000) // 2 seconds delay
     );
   }
-  
+
+  async function resizeImage(imageStr: string, width: number, height: number) {
+    // Create a canvas
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+
+    if (ctx === null) {
+      throw new Error("Could not get 2d rendering context");
+    }
+
+    const image = new Image();
+
+    image.src = imageStr;
+    image.crossOrigin = "anonymous";
+    console.log(image.src);
+    return await new Promise((resolve) => {
+      image.onload = () => {
+        // Draw the original image on it
+        ctx.drawImage(image, 0, 0, width, height);
+
+        // Create a new Image object with the canvas data
+        const img = new Image();
+        img.src = canvas.toDataURL();
+        resolve(img);
+      };
+    });
+  }
+
   const handleUploadToCloudinary = async () => {
     if (!simplifiedImageSrc) return; // Ensure the source is available
 
@@ -131,13 +159,18 @@ export default function Home() {
     const file = event.target.files?.[0];
     const reader = new FileReader();
 
-    reader.onloadend = () => {
+    reader.onloadend = async () => {
       if (typeof reader.result === "string") {
+        console.log("RUNS?");
         setImageSrc(reader.result);
-
+        console.log("READER", reader.result);
         // Loading the image to extract the color
-        const img = new Image();
-        img.src = reader.result;
+        const img = (await resizeImage(
+          reader.result,
+          500,
+          500
+        )) as HTMLImageElement;
+        // img.src = reader.result;
         img.onload = () => {
           grabColors(img);
         };
@@ -211,7 +244,6 @@ export default function Home() {
     // Update the image source with the new canvas data
 
     setSimplifiedImageSrc(canvas.toDataURL());
-
   }
 
   function paletteContainsColor(color: RGBColor, palette: number[][]): boolean {
@@ -307,8 +339,6 @@ export default function Home() {
 
     setAddress(address);
     setTokenId(token);
-
-  
   }
 
   function download() {
@@ -399,7 +429,7 @@ export default function Home() {
                   <div className="flex-grow">
                     {imageSrc && (
                       <img
-                        style={{ minWidth: "500px", minHeight: "500px" }}
+                        style={{ width: 500, height: 500 }}
                         id="unchangedImg"
                         src={imageSrc}
                         alt="Uploaded preview"
@@ -456,7 +486,7 @@ export default function Home() {
                     {simplifiedImageSrc && (
                       <div>
                         <img
-                          style={{ minWidth: "500px", minHeight: "500px" }}
+                          style={{ width: 500, height: 500 }}
                           src={simplifiedImageSrc}
                           alt="Simplified preview"
                           className="h-full w-full rounded border border border-black object-contain shadow"
