@@ -114,6 +114,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
         {/* Other meta tags as needed */}
       </Head>
       <main className="flex h-screen flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
+        <img src={NFT?.image} alt="cache"  hidden/>
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
           <Link
             className="mouse-cursor m-4 text-center text-4xl font-bold transition duration-700 hover:text-blue-500 hover:scale-105 hover:rotate-6 transform" 
@@ -145,6 +146,9 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
                 width={500}
                 height={500}
                 className="duration-1000 hover:scale-105"
+                placeholder='blur'
+                blurDataURL={imageUrl}
+
               />
             </a>
           </div>
