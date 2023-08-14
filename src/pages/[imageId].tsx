@@ -10,6 +10,10 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl }) => (
     <Head>
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:image" content={imageUrl} />
+      <meta name="twitter:url" content="https://pfpguessr.com/" />
+      <meta name="twitter:title" content="Simplify" />
+      <meta name="twitter:description" content="An NFT Simplifier." />
+      <meta property="og:image" content={imageUrl} />
       {/* Other meta tags as needed */}
     </Head>
     {/* Rest of your page content */}
