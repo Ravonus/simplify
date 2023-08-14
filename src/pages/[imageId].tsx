@@ -16,7 +16,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl }) => (
       />
       <meta name="twitter:title" content="Simplify" />
       <meta name="twitter:description" content="An NFT Simplifier." />
-      <meta property="og:image" content={imageUrl} />
+      <meta property="og:image" content={`${imageUrl}.png`} />
       <meta
         property="og:url"
         content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
