@@ -351,10 +351,7 @@ export default function Home() {
         />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="https://smplfy.world/smplfy.png" />
-        <meta
-          name="twitter:url"
-          content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
-        />
+        <meta name="twitter:url" content="https://smplfy.world/" />
         <meta name="twitter:title" content="Smplify" />
         <meta
           name="twitter:description"
