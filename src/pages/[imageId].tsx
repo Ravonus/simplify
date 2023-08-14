@@ -54,7 +54,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
 
   function changeImg() {
     const imgSrc = NFT?.image;
-    const img = document.querySelector("img");
+    const img = document.querySelector("#preview");
 
     if (img) {
       setTimeout(() => {
@@ -65,7 +65,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
   }
 
   function removeImg() {
-    const img = document.querySelector("img");
+    const img = document.querySelector("#preview");
     if (img) {
       setTimeout(() => {
         img.setAttribute("src", `${imageUrl}`);
@@ -89,7 +89,10 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
           name="twitter:url"
           content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
         />
-        <meta name="twitter:title" content={`Smplify ${NFT?.collection.name} #${NFT?.tokenId}`} />
+        <meta
+          name="twitter:title"
+          content={`Smplify ${NFT?.collection.name} #${NFT?.tokenId}`}
+        />
         <meta
           name="twitter:description"
           content={`Giving the NFT space their cognitive ability back. Converted my ${NFT?.collection.name} NFT with smplfy`}
@@ -113,10 +116,14 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
       <main className="flex h-screen flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
           <Link
-            className="mouse-cursor m-4 text-center text-4xl font-bold transition duration-700 hover:text-blue-500"
+            className="mouse-cursor m-4 text-center text-4xl font-bold transition duration-700 hover:text-blue-500 hover:scale-105 hover:rotate-6 transform" 
             href="/"
           >
-            Simplify
+            <img
+              src="/smplfylogo.png"
+              alt="logo"
+              className="mouse-cursor m-4 -mb-12 mt-1 w-32 text-center text-4xl font-bold transition duration-700 hover:text-blue-500"
+            />
           </Link>
           <h2 className="m-3 text-center text-2xl font-bold">
             {NFT?.collection.name}
@@ -132,6 +139,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
               onTouchStart={changeImg}
             >
               <Image
+                id="preview"
                 src={newSrc ?? imageUrl}
                 alt="NFT"
                 width={500}
