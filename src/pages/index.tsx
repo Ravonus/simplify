@@ -523,6 +523,7 @@ export default function Home() {
             title={title}
             contract={NFT.data?.contract}
             tokenId={NFT.data?.tokenId}
+            isMatic={isMatic}
           />
         )}
         <div className="sm:h-screen" />

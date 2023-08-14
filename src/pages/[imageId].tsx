@@ -9,29 +9,32 @@ import { api } from "~/utils/api";
 
 interface ImagePageProps {
   imageUrl: string;
+  tokenId: string;
+  contract: string;
+  matic?: string;
 }
 
-const ImagePage: React.FC<ImagePageProps> = ({ imageUrl }) => {
-  const [contract, setContract] = useState("");
-  const [tokenId, setTokenId] = useState("");
+const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract,matic }) => {
+
 
   const [newSrc, setNewSrc] = useState<string | undefined>(undefined);
 
   const NFT = api.nft.getNFT.useQuery({
     address: contract,
     tokenId,
+    isMatic: matic === "true",
   });
 
   //grab query params contract and tokenId
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const contract = urlParams.get("contract");
-    const tokenId = urlParams.get("tokenId");
-    if (!contract || !tokenId) return;
-    setContract(contract);
-    setTokenId(tokenId);
-  }, []);
+  // useEffect(() => {
+  //   const urlParams = new URLSearchParams(window.location.search);
+  //   const contract = urlParams.get("contract");
+  //   const tokenId = urlParams.get("tokenId");
+  //   if (!contract || !tokenId) return;
+  //   setContract(contract);
+  //   setTokenId(tokenId);
+  // }, []);
 
   function changeImg() {
     const imgSrc = NFT.data?.image;
@@ -58,7 +61,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl }) => {
   return (
     <div>
       <Head>
-        <title>Smplify</title>
+        <title>Smplify #{NFT.data?.tokenId}</title>
         <meta
           name="description"
           content="Giving the NFT space their cognitive ability back."
@@ -70,20 +73,23 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl }) => {
           name="twitter:url"
           content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
         />
-        <meta name="twitter:title" content="Smplify" />
+        <meta name="twitter:title" content={`Smplify # ${NFT.data?.tokenId}`} />
         <meta
           name="twitter:description"
-          content="Giving the NFT space their cognitive ability back."
+          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT.data?.collection.name} NFT with smplfy`}
         />
         <meta property="og:image" content={`${imageUrl}.png`} />
         <meta
           property="og:url"
           content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
         />
-        <meta property="og:title" content="Simplify" />
+        <meta
+          property="og:title"
+          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT.data?.collection.name} NFT with smplfy`}
+        />
         <meta
           property="og:description"
-          content="Giving the NFT space their cognitive ability back."
+          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT.data?.collection.name} NFT with smplfy`}
         />
 
         {/* Other meta tags as needed */}
@@ -143,10 +149,16 @@ export const getServerSideProps: GetServerSideProps<ImagePageProps> = (
   context
 ) => {
   const imageId = context.params?.imageId as string;
+  const tokenId = context.query.tokenId as string;
+  const contract = context.query.contract as string;
+  const matic = context.query.matic as string ?? false;
   const imageUrl = getImageUrlById(imageId);
   return Promise.resolve({
     props: {
       imageUrl,
+      tokenId,
+      contract,
+      matic,
     },
   });
 };

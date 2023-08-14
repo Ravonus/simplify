@@ -18,7 +18,7 @@ const config = {
     defaultLocale: "en",
   },
   images: {
-    domains: ["res.cloudinary.com", "i.seadn.io"],
+    domains: ["res.cloudinary.com", "i.seadn.io", "lh3.googleusercontent.com"],
   }
 };
 

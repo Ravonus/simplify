@@ -6,12 +6,13 @@ type TwitterShareProps = {
   title: string;
   contract?: string;
   tokenId?: string;
+  isMatic?: boolean;
 };
 
 const imgUrl = process.env.NEXT_PUBLIC_IMG_URL;
 
-const TwitterShare: React.FC<TwitterShareProps> = ({ publicId, title, contract, tokenId }) => {
-  const url = `${imgUrl}${publicId}?contract=${contract}&tokenId=${tokenId}`;
+const TwitterShare: React.FC<TwitterShareProps> = ({ publicId, title, contract, tokenId, isMatic }) => {
+  const url = `${imgUrl}${publicId}?contract=${contract}&tokenId=${tokenId}${isMatic ? "&matic=true" : ""}`;
   const createdBy = "Created By: @R4vonus";
 
   const description = `I've done my part for the NFT space and simplified my ${title} NFT!`;
