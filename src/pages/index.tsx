@@ -343,6 +343,7 @@ export default function Home() {
       </Head>
       <Modal setOpen={setOpen} open={open} />
       <main className="flex flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc] sm:h-screen">
+        <img src="/smplfylogo.png" alt="logo" className="mt-1 -mb-12 w-32" />
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
           <h1 className="text-5xl font-extrabold tracking-tight text-black sm:text-[5rem]">
             Simplify, Simplify, Simplify
