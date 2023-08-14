@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from 'next/link';
 import { useEffect, useState } from "react";
 import Footer from '~/components/Footer';
+import axios from "axios";
 
 import { api } from "~/utils/api";
 
@@ -12,32 +13,47 @@ interface ImagePageProps {
   tokenId: string;
   contract: string;
   matic?: string;
+  NFT?: {
+    tokenId: string;
+    image: string;
+    contract: string;
+    collection: {
+      name: string;
+    };
+  };
+
 }
 
-const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract,matic }) => {
+interface MyData {
+  tokens: {
+    token: {
+      tokenId: string;
+      image: string;
+      contract: string;
+      collection: {
+        name: string;
+      }
+    };
+  }[];
+  continuation?: string;
+}
 
+interface MyResponse {
+  data: MyData;
+}
+
+const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT }) => {
 
   const [newSrc, setNewSrc] = useState<string | undefined>(undefined);
 
-  const NFT = api.nft.getNFT.useQuery({
-    address: contract,
-    tokenId,
-    isMatic: matic === "true",
-  });
-
-  //grab query params contract and tokenId
-
-  // useEffect(() => {
-  //   const urlParams = new URLSearchParams(window.location.search);
-  //   const contract = urlParams.get("contract");
-  //   const tokenId = urlParams.get("tokenId");
-  //   if (!contract || !tokenId) return;
-  //   setContract(contract);
-  //   setTokenId(tokenId);
-  // }, []);
+  // const NFT = api.nft.getNFT.useQuery({
+  //   address: contract,
+  //   tokenId,
+  //   isMatic: matic === "true",
+  // });
 
   function changeImg() {
-    const imgSrc = NFT.data?.image;
+    const imgSrc = NFT?.image;
     const img = document.querySelector("img");
 
     if (img) {
@@ -61,7 +77,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract,matic
   return (
     <div>
       <Head>
-        <title>Smplify #{NFT.data?.tokenId}</title>
+        <title>Smplify #{NFT?.tokenId}</title>
         <meta
           name="description"
           content="Giving the NFT space their cognitive ability back."
@@ -73,10 +89,10 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract,matic
           name="twitter:url"
           content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
         />
-        <meta name="twitter:title" content={`Smplify # ${NFT.data?.tokenId}`} />
+        <meta name="twitter:title" content={`Smplify # ${NFT?.tokenId}`} />
         <meta
           name="twitter:description"
-          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT.data?.collection.name} NFT with smplfy`}
+          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT?.collection.name} NFT with smplfy`}
         />
         <meta property="og:image" content={`${imageUrl}.png`} />
         <meta
@@ -85,11 +101,11 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract,matic
         />
         <meta
           property="og:title"
-          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT.data?.collection.name} NFT with smplfy`}
+          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT?.collection.name} NFT with smplfy`}
         />
         <meta
           property="og:description"
-          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT.data?.collection.name} NFT with smplfy`}
+          content={`Giving the NFT space their cognitive ability back. Conberted my ${NFT?.collection.name} NFT with smplfy`}
         />
 
         {/* Other meta tags as needed */}
@@ -103,7 +119,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract,matic
             Simplify
           </Link>
           <h2 className="m-3 text-center text-2xl font-bold">
-            {NFT.data?.collection.name}
+            {NFT?.collection.name}
           </h2>
           <div className="flex items-center justify-center">
             <a
@@ -125,7 +141,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract,matic
             </a>
           </div>
           <h2 className="m-2 text-center text-2xl font-bold">
-            #{NFT.data?.tokenId}
+            #{NFT?.tokenId}
           </h2>
         </div>
         <div className="h-screen" />
@@ -145,7 +161,7 @@ const getImageUrlById = (imageId: string): string => {
   return `https://res.cloudinary.com/doaxhxkmq/image/upload/v1692002576/${imageId}`;
 };
 
-export const getServerSideProps: GetServerSideProps<ImagePageProps> = (
+export const getServerSideProps: GetServerSideProps<ImagePageProps> = async (
   context
 ) => {
   const imageId = context.params?.imageId as string;
@@ -153,12 +169,29 @@ export const getServerSideProps: GetServerSideProps<ImagePageProps> = (
   const contract = context.query.contract as string;
   const matic = context.query.matic as string ?? false;
   const imageUrl = getImageUrlById(imageId);
+
+    const url = `https://api${
+      matic ? "-polygon" : ""
+    }.reservoir.tools/tokens/v6?tokens=${contract}:${tokenId}`;
+
+    const res: MyResponse = await axios.get(url, {
+      headers: {
+        "x-api-key": `${process.env.RESERVOIR_API_KEY ?? ""}`,
+        contentType: "application/json",
+      },
+    });
+
+
+
+
+  
+  
   return Promise.resolve({
     props: {
       imageUrl,
       tokenId,
       contract,
-      matic,
+      NFT: res?.data?.tokens[0]?.token,
     },
   });
 };
