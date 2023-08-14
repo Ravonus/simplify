@@ -9,11 +9,9 @@ import ColorThief from "color-thief-ts";
 import crypto from "crypto";
 import TwitterShare from "~/components/TwitterShare";
 import Button from "~/components/Button";
-import Footer from '~/components/Footer';
-import Modal from '~/components/Modal';
-import NumberSlider from '~/components/NumberSlider';
-
-
+import Footer from "~/components/Footer";
+import Modal from "~/components/Modal";
+import NumberSlider from "~/components/NumberSlider";
 
 type RGBColor = [number, number, number];
 
@@ -53,18 +51,26 @@ export default function Home() {
   const NFT = api.nft.getNFT.useQuery({ address, tokenId, isMatic });
 
   useEffect(() => {
+    const body = document.querySelector("body");
+    if (body) {
+      body.classList.add("bg-gradient-to-b", "from-[#ffffff]", "to-[#f5f5dc]");
+      body.style.backgroundImage = "none";
+      body.style.backgroundColor = "#f5f5dc";
+    }
+  }, []);
+
+  useEffect(() => {
     handleUploadToCloudinary().catch(console.error);
   }, [simplifiedImageSrc]);
 
   useEffect(() => {
     if (!NFT.data || NFT?.data?.name === "") return;
 
-    console.log("NFT", NFT.data)
+    console.log("NFT", NFT.data);
 
     setImageSrc(NFT.data.image);
 
     const img = new Image();
-
 
     img.src = NFT.data.image;
 
@@ -93,11 +99,10 @@ export default function Home() {
     setTimer(
       setTimeout(() => {
         setTokenId(str);
-
       }, 2000) // 2 seconds delay
     );
   }
-  
+
   const handleUploadToCloudinary = async () => {
     if (!simplifiedImageSrc) return; // Ensure the source is available
 
@@ -150,7 +155,7 @@ export default function Home() {
     }
   };
 
-  function grabColors(img: HTMLImageElement, count:number) {
+  function grabColors(img: HTMLImageElement, count: number) {
     const colorThief = new ColorThief();
 
     const opts = {
@@ -212,7 +217,6 @@ export default function Home() {
     // Update the image source with the new canvas data
 
     setSimplifiedImageSrc(canvas.toDataURL());
-
   }
 
   function paletteContainsColor(color: RGBColor, palette: number[][]): boolean {
@@ -305,18 +309,16 @@ export default function Home() {
     const token = split[split.length - 1];
     const chain = split[split.length - 3];
 
-    console.log('chain', chain)
+    console.log("chain", chain);
 
     if (!address || !token) return;
 
     setAddress(address);
     setTokenId(token);
 
-    if(chain === 'matic') {
+    if (chain === "matic") {
       setIsMatic(true);
     }
-
-  
   }
 
   function download() {
@@ -332,14 +334,10 @@ export default function Home() {
     if (imageSrc) {
       const img = new Image();
       img.crossOrigin = "anonymous";
-      img.src = imageSrc
-      img.onload = () =>
-        grabColors(img, num);
-      
+      img.src = imageSrc;
+      img.onload = () => grabColors(img, num);
     }
-
   }
-
 
   return (
     <>

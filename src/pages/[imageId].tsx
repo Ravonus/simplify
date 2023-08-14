@@ -52,6 +52,17 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
   //   isMatic: matic === "true",
   // });
 
+  //use effect to set body gradient color
+  useEffect(() => {
+    const body = document.querySelector("body");
+    if (body) {
+      body.classList.add("bg-gradient-to-b", "from-[#ffffff]", "to-[#f5f5dc]");
+      body.style.backgroundImage = "none";
+      body.style.backgroundColor = "#f5f5dc";
+
+    }
+  }, []);
+
   function changeImg() {
     const imgSrc = NFT?.image;
     const img = document.querySelector("#preview");
@@ -73,6 +84,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
       }, 400);
     }
   }
+
 
   return (
     <div>
@@ -113,7 +125,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
 
         {/* Other meta tags as needed */}
       </Head>
-      <main className="flex h-screen flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
+      <main className="flex sm:h-100 h-min-screen  flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
         <img src={NFT?.image} alt="cache"  hidden/>
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
           <Link
@@ -156,7 +168,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
             #{NFT?.tokenId}
           </h2>
         </div>
-        <div className="h-screen" />
+        <div className="absolute -bottom-12" />
         <div className="container gap-8 px-4 py-8">
           <Footer />
         </div>
