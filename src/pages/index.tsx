@@ -13,7 +13,7 @@ import Footer from '~/components/Footer';
 import Modal from '~/components/Modal';
 import NumberSlider from '~/components/NumberSlider';
 
-import smplfy from '~/public/smplfy.png';
+
 
 type RGBColor = [number, number, number];
 
@@ -350,7 +350,7 @@ export default function Home() {
           content="Giving the NFT space their cognitive ability back."
         />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={smplfy.src} />
+        <meta name="twitter:image" content="/smplfy.png" />
         <meta
           name="twitter:url"
           content="https://main--fabulous-heliotrope-b6df16.netlify.app/"
@@ -360,11 +360,8 @@ export default function Home() {
           name="twitter:description"
           content="Giving the NFT space their cognitive ability back."
         />
-        <meta property="og:image" content={smplfy.src} />
-        <meta
-          property="og:url"
-          content="https://smplfy.me/"
-        />
+        <meta property="og:image" content="/smplfy.png" />
+        <meta property="og:url" content="https://smplfy.me/" />
         <meta property="og:title" content="Simplify" />
         <meta
           property="og:description"
