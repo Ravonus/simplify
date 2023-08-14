@@ -1,5 +1,6 @@
 import { type GetServerSideProps } from "next";
 import Head from "next/head";
+import Image from 'next/image';
 
 interface ImagePageProps {
   imageUrl: string;
@@ -26,7 +27,16 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl }) => (
 
       {/* Other meta tags as needed */}
     </Head>
-    {/* Rest of your page content */}
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc]">
+      <div className="flex flex-col items-center justify-center">
+        <h1 className="text-4xl font-bold text-center m-4">
+          Simplify
+        </h1>
+        <div className="flex items-center justify-center">
+          <Image src={imageUrl} alt="NFT" width={500} height={500} />
+        </div>
+      </div>
+    </main>
   </div>
 );
 
