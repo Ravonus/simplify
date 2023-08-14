@@ -50,7 +50,7 @@ export default function Footer() {
             Banner By:{" "}
             <a
               className="text-blue-300 transition-colors duration-700 ease-in-out hover:text-blue-900"
-              href="https://twitter.com/R4vonus"
+              href="https://twitter.com/AdamGMcWilliam"
               target="_blank"
               rel="noopener noreferrer"
             >
