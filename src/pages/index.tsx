@@ -344,7 +344,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Smplify</title>
+        <title>Smplfy</title>
         <meta
           name="description"
           content="Giving the NFT space their cognitive ability back."
@@ -352,7 +352,7 @@ export default function Home() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="https://smplfy.world/smplfy.png" />
         <meta name="twitter:url" content="https://smplfy.world/" />
-        <meta name="twitter:title" content="Smplify" />
+        <meta name="twitter:title" content="Smplfy" />
         <meta
           name="twitter:description"
           content="Giving the NFT space their cognitive ability back."
