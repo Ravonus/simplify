@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
-import { api, type RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 
 import ColorThief from "color-thief-ts";
 
@@ -453,7 +453,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        {publicId && <TwitterShare publicId={publicId} title={title} />}
+        {publicId && <TwitterShare publicId={publicId} title={title} contract={NFT.data?.contract} tokenId={NFT.data?.tokenId} />}
       </main>
     </>
   );
