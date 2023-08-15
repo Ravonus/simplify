@@ -554,16 +554,29 @@ type RGBColor = [number, number, number];
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-center sm:hidden">
+              {/* <div className="flex items-center justify-center sm:hidden">
                 <div className="text-3xl">↓</div>
+              </div> */}
+
+              <div className="flex items-center justify-center sm:hidden">
+                {loader ? (
+                  <div className="relative ml-[62px] w-5/12 items-center justify-center mb-20">
+                    <div className="absolute  h-12 w-12 animate-spin rounded-full border-4 border-gray-900 border-b-blue-700 border-t-blue-700 ml-10 mt-4"></div>
+                  </div>
+                ) : (
+                  <div className="flex w-5/12 items-center justify-center mb-2">
+                    <div className="text-7xl">↓</div>
+                  </div>
+                )}
               </div>
+
               {loader ? (
-                 <div className="flex hidden w-5/12 items-center justify-center sm:flex relative ml-[26px]">
-                  <div className="h-6 w-6 animate-spin rounded-full border border-gray-900 border-b-blue-700 border-t-blue-700 absolute ml-16"></div>
+                <div className="relative ml-[62px] flex hidden w-5/12 items-center justify-center sm:flex">
+                  <div className="absolute ml-6 h-12 w-12 animate-spin rounded-full border-4 border-gray-900 border-b-blue-700 border-t-blue-700"></div>
                 </div>
               ) : (
                 <div className="flex hidden w-5/12 items-center justify-center sm:flex">
-                  <div className="text-3xl">→</div>
+                  <div className="text-7xl">→</div>
                 </div>
               )}
 
