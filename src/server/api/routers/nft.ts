@@ -76,6 +76,7 @@ const getRandomNFTFromReservoir = async (
     return res?.data?.tokens[0]?.token as NFTDataResponse;
   } catch (error) {
     console.error("Error fetching data from Reservoir API: ");
+    console.log(error)
     //reroll until valid NFT
     return {
       tokenId: "",

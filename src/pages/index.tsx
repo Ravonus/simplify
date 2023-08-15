@@ -14,6 +14,7 @@ import Modal from "~/components/Modal";
 import NumberSlider from "~/components/NumberSlider";
 
 type RGBColor = [number, number, number];
+type Cluster = RGBColor;
 
 export default function Home() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -48,6 +49,8 @@ export default function Home() {
 
   const [simplify, setSimplify] = useState<number>(9);
 
+  const [loader, setLoader] = useState<boolean>(false);
+
   const NFT = api.nft.getNFT.useQuery({ address, tokenId, isMatic });
 
   useEffect(() => {
@@ -60,13 +63,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+      
     //handleUploadToCloudinary().catch(console.error);
   }, [simplifiedImageSrc]);
 
   useEffect(() => {
     if (!NFT.data || NFT?.data?.name === "") return;
-
-    console.log("NFT", NFT.data);
 
     setImageSrc(NFT.data.image);
 
@@ -77,11 +79,12 @@ export default function Home() {
     img.crossOrigin = "anonymous";
     setTitle(NFT.data.collection.name);
     img.onload = () => {
-      grabColors(img, simplify);
+      setLoader(true);
+        setTimeout(() => grabColors(img, simplify), 0);
     };
 
     //set change event
-  }, [NFT.data]);
+  }, [NFT.data, simplify]);
 
   useEffect(() => {
     if (!address || !tokenId) return;
@@ -111,7 +114,8 @@ export default function Home() {
         const img = new Image();
         img.src = reader.result;
         img.onload = () => {
-          grabColors(img, simplify);
+          setLoader(true);
+          setTimeout(() => grabColors(img, simplify), 0);
         };
       }
     };
@@ -122,6 +126,7 @@ export default function Home() {
   };
 
   function grabColors(img: HTMLImageElement, count: number) {
+  
     const colorThief = new ColorThief();
 
     const opts = {
@@ -129,7 +134,22 @@ export default function Home() {
       colorType: "array",
     } as const;
 
-    const tmpPalette = colorThief.getPalette(img, count, opts);
+    //const tmpPalette = colorThief.getPalette(img, count, opts);
+
+    const canvasData = document.createElement("canvas");
+    canvasData.width = img.width;
+    canvasData.height = img.height;
+
+    const ctxData = canvasData.getContext("2d");
+
+    if (!ctxData) {
+      throw new Error("Failed to create canvas context");
+    }
+    ctxData.drawImage(img, 0, 0);
+  
+    const tmpPalette = count > 16 ? quantizeImage(
+      ctxData.getImageData(0, 0, img.width, img.height), count
+    ) : colorThief.getPalette(img, count, opts);
 
     const mostDominantColor = colorThief.getColor(img, opts);
 
@@ -178,11 +198,15 @@ export default function Home() {
         }
       }
     }
-    ctx.putImageData(imageData, 0, 0);
+    ctx.putImageData(imageData, 0, 0)
 
     // Update the image source with the new canvas data
 
     setSimplifiedImageSrc(canvas.toDataURL());
+    setTimeout(() => {
+      setLoader(false);
+    }, 500);
+   
   }
 
   function paletteContainsColor(color: RGBColor, palette: number[][]): boolean {
@@ -295,15 +319,91 @@ export default function Home() {
     link.click();
   }
 
-  function changeSimplify(num: number) {
-    setSimplify(num);
-    if (imageSrc) {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = imageSrc;
-      img.onload = () => grabColors(img, num);
+
+type RGBColor = [number, number, number];
+
+  function quantizeImage(imageData: ImageData, numColors: number): number[][] {
+  
+  const pixels: RGBColor[] = [];
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    pixels.push([
+      imageData.data[i]!,
+      imageData.data[i + 1]!,
+      imageData.data[i + 2]!,
+    ]);
+  }
+
+  const clusters: RGBColor[] = [];
+  for (let i = 0; i < numColors; i++) {
+    clusters.push(pixels[Math.floor(Math.random() * pixels.length)]!);
+  }
+
+  let assignments: number[] = [];
+  let hasChanged = true;
+  while (hasChanged) {
+    hasChanged = false;
+    assignments = pixels.map((pixel) => {
+      let minDistance = Infinity;
+      let clusterIndex = -1;
+      clusters.forEach((cluster, index) => {
+        const distance =
+          Math.pow(cluster[0]! - pixel[0]!, 2) +
+          Math.pow(cluster[1]! - pixel[1]!, 2) +
+          Math.pow(cluster[2]! - pixel[2]!, 2);
+        if (distance < minDistance) {
+          minDistance = distance;
+          clusterIndex = index;
+        }
+      });
+      return clusterIndex;
+    });
+
+    const newClusters: RGBColor[] = Array.from({ length: numColors }, () => [
+      0, 0, 0,
+    ]);
+    const counts: number[] = Array(numColors).fill(0) as number[];
+    assignments.forEach((clusterIndex, pixelIndex) => {
+      newClusters[clusterIndex]![0] += pixels[pixelIndex]![0]!;
+      newClusters[clusterIndex]![1] += pixels[pixelIndex]![1]!;
+      newClusters[clusterIndex]![2] += pixels[pixelIndex]![2]!;
+      counts[clusterIndex]!++;
+    });
+    newClusters.forEach((cluster, index) => {
+      if (counts[index]! > 0) {
+        cluster[0]! /= counts[index]!;
+        cluster[1]! /= counts[index]!;
+        cluster[2]! /= counts[index]!;
+      }
+    });
+
+    for (let i = 0; i < numColors; i++) {
+      if (
+        clusters[i]![0] !== newClusters[i]![0] ||
+        clusters[i]![1] !== newClusters[i]![1] ||
+        clusters[i]![2] !== newClusters[i]![2]
+      ) {
+        hasChanged = true;
+        clusters[i] = newClusters[i]!;
+      }
     }
   }
+
+  for (let i = 0; i < pixels.length; i++) {
+    const clusterIndex = assignments[i];
+    if(!clusterIndex) continue;
+    const cluster = clusters[clusterIndex]!;
+    imageData.data[i * 4] = cluster[0]!;
+    imageData.data[i * 4 + 1] = cluster[1]!;
+    imageData.data[i * 4 + 2] = cluster[2]!;
+  }
+
+  return clusters.map((cluster) => [
+    Math.round(cluster[0]!),
+    Math.round(cluster[1]!),
+    Math.round(cluster[2]!),
+  ]);
+}
+
 
   return (
     <>
@@ -335,7 +435,7 @@ export default function Home() {
       <main className="flex flex-col items-center bg-gradient-to-b from-[#ffffff] to-[#f5f5dc] sm:h-screen">
         <img src="/smplfylogo.png" alt="logo" className="-mb-12 mt-1 w-32" />
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
-          <h1 className="text-5xl font-extrabold tracking-tight text-black sm:text-[5rem] justify-center text-center">
+          <h1 className="justify-center text-center text-5xl font-extrabold tracking-tight text-black sm:text-[5rem]">
             Simplify, Simplify, Simplify
           </h1>
           <Button label="Manifesto" onClick={() => setOpen(!open)} />
@@ -457,9 +557,16 @@ export default function Home() {
               <div className="flex items-center justify-center sm:hidden">
                 <div className="text-3xl">↓</div>
               </div>
-              <div className="flex hidden w-5/12 items-center justify-center sm:flex">
-                <div className="text-3xl">→</div>
-              </div>
+              {loader ? (
+                 <div className="flex hidden w-5/12 items-center justify-center sm:flex relative ml-[26px]">
+                  <div className="h-6 w-6 animate-spin rounded-full border border-gray-900 border-b-blue-700 border-t-blue-700 absolute ml-16"></div>
+                </div>
+              ) : (
+                <div className="flex hidden w-5/12 items-center justify-center sm:flex">
+                  <div className="text-3xl">→</div>
+                </div>
+              )}
+
               <div>
                 {/* Simplified image and palette code */}
                 {simplifiedDarkestColor && (
@@ -480,6 +587,7 @@ export default function Home() {
                       <div className="flex flex-col">
                         <div className="flex justify-center sm:hidden">
                           {simplifiedPalette.map((color, index) =>
+                            index < 16 &&
                             index % 2 === 0 &&
                             simplifiedDarkestColor &&
                             color.toString() !==
@@ -498,6 +606,7 @@ export default function Home() {
                         </div>
                         <div className="mb-1 flex justify-center sm:hidden">
                           {simplifiedPalette.map((color, index) =>
+                            index < 16 &&
                             index % 2 !== 0 &&
                             simplifiedDarkestColor &&
                             color.toString() !==
@@ -517,6 +626,7 @@ export default function Home() {
                         <div className="mt-8 hidden grid-cols-2 grid-rows-2 gap-0 sm:grid">
                           {simplifiedPalette.map(
                             (color, index) =>
+                              index < 16 &&
                               simplifiedDarkestColor &&
                               color.toString() !==
                                 simplifiedDarkestColor.toString() && (
@@ -540,8 +650,10 @@ export default function Home() {
                       <div>
                         <div className="-mt-0 sm:-mt-[60px]">
                           <NumberSlider
+                            imageSrc={imageSrc ?? ""}
                             simplify={simplify}
-                            setSimplify={changeSimplify}
+                            setSimplify={setSimplify}
+                            grabColors={grabColors}
                           />
                         </div>
                         <div
