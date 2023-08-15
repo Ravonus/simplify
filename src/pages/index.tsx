@@ -80,7 +80,7 @@ export default function Home() {
     setTitle(NFT.data.collection.name);
     img.onload = () => {
       setLoader(true);
-        setTimeout(() => grabColors(img, simplify), 0);
+        setTimeout(() => grabColors(img, simplify), 500);
     };
 
     //set change event
@@ -115,7 +115,7 @@ export default function Home() {
         img.src = reader.result;
         img.onload = () => {
           setLoader(true);
-          setTimeout(() => grabColors(img, simplify), 0);
+          setTimeout(() => grabColors(img, simplify), 500);
         };
       }
     };
