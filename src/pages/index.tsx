@@ -13,6 +13,8 @@ import Footer from "~/components/Footer";
 import Modal from "~/components/Modal";
 import NumberSlider from "~/components/NumberSlider";
 
+//import gifFrames from "gif-frames";
+
 type RGBColor = [number, number, number];
 type Cluster = RGBColor;
 
@@ -63,25 +65,50 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-      
     //handleUploadToCloudinary().catch(console.error);
   }, [simplifiedImageSrc]);
 
   useEffect(() => {
     if (!NFT.data || NFT?.data?.name === "") return;
+    setTitle(NFT.data.collection.name);
+    fetch(NFT.data.image)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img.src = url;
+        img.onload = () => {
+          if (blob.type === "image/gif") {
+            console.log("gif");
+            // const frames = await gifFrames({ url, frames: "all", outputType: "canvas" });
+            // console.log(frames)
+          }
+          setLoader(true);
+          setTimeout(() => grabColors(img, simplify), 500);
+        };
+      })
+      .catch((e) => console.error(e));
 
     setImageSrc(NFT.data.image);
 
-    const img = new Image();
+    // const img = new Image();
 
-    img.src = NFT.data.image;
+    // img.src = NFT.data.image;
 
-    img.crossOrigin = "anonymous";
-    setTitle(NFT.data.collection.name);
-    img.onload = () => {
-      setLoader(true);
-        setTimeout(() => grabColors(img, simplify), 500);
-    };
+    // img.crossOrigin = "anonymous";
+
+    // img.onload = () => {
+    //   //check if gif (if so we want to do grab frames and loop instead)
+    //   // const isGif = NFT.data.image.includes(".gif");
+
+    //   // const fileHeader = img.src.slice(0, 4);
+
+    //   // console.log("fileHeader", fileHeader);
+
+
+    //   setLoader(true);
+    //   // setTimeout(() => grabColors(img, simplify), 500);
+    // };
 
     //set change event
   }, [NFT.data, simplify]);
@@ -110,6 +137,23 @@ export default function Home() {
       if (typeof reader.result === "string") {
         setImageSrc(reader.result);
 
+        fetch(reader.result)
+          .then((response) => response.blob())
+          .then((blob) => {
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.src = url;
+            img.onload = () => {
+              console.log(blob.type);
+              if (blob.type === "image/gif") {
+                console.log("gif");
+              }
+              setLoader(true);
+              setTimeout(() => grabColors(img, simplify), 500);
+            };
+          })
+          .catch((e) => console.error(e));
+
         // Loading the image to extract the color
         const img = new Image();
         img.src = reader.result;
@@ -126,7 +170,6 @@ export default function Home() {
   };
 
   function grabColors(img: HTMLImageElement, count: number) {
-  
     const colorThief = new ColorThief();
 
     const opts = {
@@ -146,10 +189,14 @@ export default function Home() {
       throw new Error("Failed to create canvas context");
     }
     ctxData.drawImage(img, 0, 0);
-  
-    const tmpPalette = count > 16 ? quantizeImage(
-      ctxData.getImageData(0, 0, img.width, img.height), count
-    ) : colorThief.getPalette(img, count, opts);
+
+    const tmpPalette =
+      count > 16
+        ? quantizeImage(
+            ctxData.getImageData(0, 0, img.width, img.height),
+            count
+          )
+        : colorThief.getPalette(img, count, opts);
 
     const mostDominantColor = colorThief.getColor(img, opts);
 
@@ -198,7 +245,7 @@ export default function Home() {
         }
       }
     }
-    ctx.putImageData(imageData, 0, 0)
+    ctx.putImageData(imageData, 0, 0);
 
     // Update the image source with the new canvas data
 
@@ -206,7 +253,6 @@ export default function Home() {
     setTimeout(() => {
       setLoader(false);
     }, 500);
-   
   }
 
   function paletteContainsColor(color: RGBColor, palette: number[][]): boolean {
@@ -292,7 +338,6 @@ export default function Home() {
       }
     }
 
-    //grab address and token from opensea url https://opensea.io/assets/ethereum/0x02e9b2389156ee8ed963b1341a69d5f54ada4d82/938
 
     const split = str.split("/");
     const address = split[split.length - 2];
@@ -319,91 +364,88 @@ export default function Home() {
     link.click();
   }
 
-
-type RGBColor = [number, number, number];
+  type RGBColor = [number, number, number];
 
   function quantizeImage(imageData: ImageData, numColors: number): number[][] {
-  
-  const pixels: RGBColor[] = [];
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    pixels.push([
-      imageData.data[i]!,
-      imageData.data[i + 1]!,
-      imageData.data[i + 2]!,
-    ]);
-  }
+    const pixels: RGBColor[] = [];
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      pixels.push([
+        imageData.data[i]!,
+        imageData.data[i + 1]!,
+        imageData.data[i + 2]!,
+      ]);
+    }
 
-  const clusters: RGBColor[] = [];
-  for (let i = 0; i < numColors; i++) {
-    clusters.push(pixels[Math.floor(Math.random() * pixels.length)]!);
-  }
+    const clusters: RGBColor[] = [];
+    for (let i = 0; i < numColors; i++) {
+      clusters.push(pixels[Math.floor(Math.random() * pixels.length)]!);
+    }
 
-  let assignments: number[] = [];
-  let hasChanged = true;
-  while (hasChanged) {
-    hasChanged = false;
-    assignments = pixels.map((pixel) => {
-      let minDistance = Infinity;
-      let clusterIndex = -1;
-      clusters.forEach((cluster, index) => {
-        const distance =
-          Math.pow(cluster[0]! - pixel[0]!, 2) +
-          Math.pow(cluster[1]! - pixel[1]!, 2) +
-          Math.pow(cluster[2]! - pixel[2]!, 2);
-        if (distance < minDistance) {
-          minDistance = distance;
-          clusterIndex = index;
+    let assignments: number[] = [];
+    let hasChanged = true;
+    while (hasChanged) {
+      hasChanged = false;
+      assignments = pixels.map((pixel) => {
+        let minDistance = Infinity;
+        let clusterIndex = -1;
+        clusters.forEach((cluster, index) => {
+          const distance =
+            Math.pow(cluster[0]! - pixel[0]!, 2) +
+            Math.pow(cluster[1]! - pixel[1]!, 2) +
+            Math.pow(cluster[2]! - pixel[2]!, 2);
+          if (distance < minDistance) {
+            minDistance = distance;
+            clusterIndex = index;
+          }
+        });
+        return clusterIndex;
+      });
+
+      const newClusters: RGBColor[] = Array.from({ length: numColors }, () => [
+        0, 0, 0,
+      ]);
+      const counts: number[] = Array(numColors).fill(0) as number[];
+      assignments.forEach((clusterIndex, pixelIndex) => {
+        newClusters[clusterIndex]![0] += pixels[pixelIndex]![0]!;
+        newClusters[clusterIndex]![1] += pixels[pixelIndex]![1]!;
+        newClusters[clusterIndex]![2] += pixels[pixelIndex]![2]!;
+        counts[clusterIndex]!++;
+      });
+      newClusters.forEach((cluster, index) => {
+        if (counts[index]! > 0) {
+          cluster[0]! /= counts[index]!;
+          cluster[1]! /= counts[index]!;
+          cluster[2]! /= counts[index]!;
         }
       });
-      return clusterIndex;
-    });
 
-    const newClusters: RGBColor[] = Array.from({ length: numColors }, () => [
-      0, 0, 0,
-    ]);
-    const counts: number[] = Array(numColors).fill(0) as number[];
-    assignments.forEach((clusterIndex, pixelIndex) => {
-      newClusters[clusterIndex]![0] += pixels[pixelIndex]![0]!;
-      newClusters[clusterIndex]![1] += pixels[pixelIndex]![1]!;
-      newClusters[clusterIndex]![2] += pixels[pixelIndex]![2]!;
-      counts[clusterIndex]!++;
-    });
-    newClusters.forEach((cluster, index) => {
-      if (counts[index]! > 0) {
-        cluster[0]! /= counts[index]!;
-        cluster[1]! /= counts[index]!;
-        cluster[2]! /= counts[index]!;
-      }
-    });
-
-    for (let i = 0; i < numColors; i++) {
-      if (
-        clusters[i]![0] !== newClusters[i]![0] ||
-        clusters[i]![1] !== newClusters[i]![1] ||
-        clusters[i]![2] !== newClusters[i]![2]
-      ) {
-        hasChanged = true;
-        clusters[i] = newClusters[i]!;
+      for (let i = 0; i < numColors; i++) {
+        if (
+          clusters[i]![0] !== newClusters[i]![0] ||
+          clusters[i]![1] !== newClusters[i]![1] ||
+          clusters[i]![2] !== newClusters[i]![2]
+        ) {
+          hasChanged = true;
+          clusters[i] = newClusters[i]!;
+        }
       }
     }
+
+    for (let i = 0; i < pixels.length; i++) {
+      const clusterIndex = assignments[i];
+      if (!clusterIndex) continue;
+      const cluster = clusters[clusterIndex]!;
+      imageData.data[i * 4] = cluster[0]!;
+      imageData.data[i * 4 + 1] = cluster[1]!;
+      imageData.data[i * 4 + 2] = cluster[2]!;
+    }
+
+    return clusters.map((cluster) => [
+      Math.round(cluster[0]!),
+      Math.round(cluster[1]!),
+      Math.round(cluster[2]!),
+    ]);
   }
-
-  for (let i = 0; i < pixels.length; i++) {
-    const clusterIndex = assignments[i];
-    if(!clusterIndex) continue;
-    const cluster = clusters[clusterIndex]!;
-    imageData.data[i * 4] = cluster[0]!;
-    imageData.data[i * 4 + 1] = cluster[1]!;
-    imageData.data[i * 4 + 2] = cluster[2]!;
-  }
-
-  return clusters.map((cluster) => [
-    Math.round(cluster[0]!),
-    Math.round(cluster[1]!),
-    Math.round(cluster[2]!),
-  ]);
-}
-
 
   return (
     <>
@@ -560,11 +602,11 @@ type RGBColor = [number, number, number];
 
               <div className="flex items-center justify-center sm:hidden">
                 {loader ? (
-                  <div className="relative ml-[62px] w-5/12 items-center justify-center mb-20">
-                    <div className="absolute  h-12 w-12 animate-spin rounded-full border-4 border-gray-900 border-b-blue-700 border-t-blue-700 ml-10 mt-4"></div>
+                  <div className="relative mb-20 ml-[62px] w-5/12 items-center justify-center">
+                    <div className="absolute  ml-10 mt-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-900 border-b-blue-700 border-t-blue-700"></div>
                   </div>
                 ) : (
-                  <div className="flex w-5/12 items-center justify-center mb-2">
+                  <div className="mb-2 flex w-5/12 items-center justify-center">
                     <div className="text-7xl">↓</div>
                   </div>
                 )}

@@ -42,7 +42,7 @@ interface MyResponse {
   data: MyData;
 }
 
-const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT }) => {
+const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT, matic }) => {
 
   const [newSrc, setNewSrc] = useState<string | undefined>(undefined);
 
@@ -143,12 +143,14 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
           </h2>
           <div className="flex items-center justify-center">
             <div
-              className="relative flex group"
+              className="group relative flex"
               style={{ minWidth: "500px", minHeight: "500px" }}
             >
-              <div className="absolute h-full w-full rounded bg-white group-hover:scale-105 duration-1000" />
+              <div className="absolute h-full w-full rounded bg-white duration-1000 group-hover:scale-105" />
               <a
-                href={`https://opensea.io/assets/ethereum/${contract}/${tokenId}`}
+                href={`https://opensea.io/assets/${
+                  matic ? "matic" : "ethereum"
+                }/${contract}/${tokenId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onMouseEnter={changeImg}
@@ -162,7 +164,7 @@ const ImagePage: React.FC<ImagePageProps> = ({ imageUrl, tokenId, contract, NFT 
                   alt="NFT"
                   width={500}
                   height={500}
-                  className="absolute rounded border border border-black duration-1000 group-hover:scale-105 shadow"
+                  className="absolute rounded border border border-black shadow duration-1000 group-hover:scale-105"
                   placeholder="blur"
                   blurDataURL={imageUrl}
                 />
@@ -210,17 +212,13 @@ export const getServerSideProps: GetServerSideProps<ImagePageProps> = async (
       },
     });
 
-
-
-
-  
-  
   return Promise.resolve({
     props: {
       imageUrl,
       tokenId,
       contract,
       NFT: res?.data?.tokens[0]?.token,
+      matic,
     },
   });
 };
