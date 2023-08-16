@@ -45,7 +45,7 @@ const NumberSlider = ({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4 p-[23px]">
+    <div className="flex flex-col items-center space-y-4 p-[23px] -mt-[118px]">
       <input
         type="range"
         min="2"
