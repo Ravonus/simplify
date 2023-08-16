@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Button from './Button';
 
 interface NumberSliderProps {
   imageSrc: string;
@@ -15,6 +16,7 @@ const NumberSlider = ({
 }: NumberSliderProps) => {
   // Keep track of the timer ID
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
+  const [enableHighQuality, setEnableHighQuality] = useState<boolean>(false);
 
   function changeSimplify(num: number) {
 
@@ -43,17 +45,17 @@ const NumberSlider = ({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <div className="flex flex-col items-center space-y-4 p-[23px]">
       <input
         type="range"
         min="2"
-        max="32"
+        max={enableHighQuality ? "128" : "16"}
         step="1"
         value={simplify}
         onChange={handleChange}
         className="w-full max-w-md cursor-pointer"
       />
-      <div className="text-lg font-semibold">{simplify}</div>
+      <Button label={`${enableHighQuality ? 'Disable' : 'Enable'} high quality`} onClick={() => setEnableHighQuality(!enableHighQuality)} />
     </div>
   );
 };

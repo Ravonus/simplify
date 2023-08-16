@@ -364,88 +364,125 @@ export default function Home() {
     link.click();
   }
 
-  type RGBColor = [number, number, number];
+type RGBColor = [number, number, number];
 
-  function quantizeImage(imageData: ImageData, numColors: number): number[][] {
-    const pixels: RGBColor[] = [];
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      pixels.push([
-        imageData.data[i]!,
-        imageData.data[i + 1]!,
-        imageData.data[i + 2]!,
-      ]);
-    }
+function quantizeImage(
+  imageData: ImageData,
+  numColors: number,
+  maxIterations = 10,
+  sampleRate = 1,
+  resizeScale = 1
+): number[][] {
+  const tempCanvas = document.createElement("canvas");
+  const tempCtx = tempCanvas.getContext("2d");
+  tempCanvas.width = imageData.width;
+  tempCanvas.height = imageData.height;
+  tempCtx?.putImageData(imageData, 0, 0);
 
-    const clusters: RGBColor[] = [];
-    for (let i = 0; i < numColors; i++) {
-      clusters.push(pixels[Math.floor(Math.random() * pixels.length)]!);
-    }
+  // Create a new canvas for resizing
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = imageData.width * resizeScale;
+  canvas.height = imageData.height * resizeScale;
+  ctx?.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+  const resizedImageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
 
-    let assignments: number[] = [];
-    let hasChanged = true;
-    while (hasChanged) {
-      hasChanged = false;
-      assignments = pixels.map((pixel) => {
-        let minDistance = Infinity;
-        let clusterIndex = -1;
-        clusters.forEach((cluster, index) => {
-          const distance =
-            Math.pow(cluster[0]! - pixel[0]!, 2) +
-            Math.pow(cluster[1]! - pixel[1]!, 2) +
-            Math.pow(cluster[2]! - pixel[2]!, 2);
-          if (distance < minDistance) {
-            minDistance = distance;
-            clusterIndex = index;
-          }
-        });
-        return clusterIndex;
-      });
 
-      const newClusters: RGBColor[] = Array.from({ length: numColors }, () => [
-        0, 0, 0,
-      ]);
-      const counts: number[] = Array(numColors).fill(0) as number[];
-      assignments.forEach((clusterIndex, pixelIndex) => {
-        newClusters[clusterIndex]![0] += pixels[pixelIndex]![0]!;
-        newClusters[clusterIndex]![1] += pixels[pixelIndex]![1]!;
-        newClusters[clusterIndex]![2] += pixels[pixelIndex]![2]!;
-        counts[clusterIndex]!++;
-      });
-      newClusters.forEach((cluster, index) => {
-        if (counts[index]! > 0) {
-          cluster[0]! /= counts[index]!;
-          cluster[1]! /= counts[index]!;
-          cluster[2]! /= counts[index]!;
-        }
-      });
-
-      for (let i = 0; i < numColors; i++) {
-        if (
-          clusters[i]![0] !== newClusters[i]![0] ||
-          clusters[i]![1] !== newClusters[i]![1] ||
-          clusters[i]![2] !== newClusters[i]![2]
-        ) {
-          hasChanged = true;
-          clusters[i] = newClusters[i]!;
-        }
+  const pixels: RGBColor[] = [];
+  if (resizedImageData) {
+    for (let i = 0; i < resizedImageData.data.length; i += 4) {
+      if (Math.random() < sampleRate) {
+        pixels.push([
+          resizedImageData.data[i]!,
+          resizedImageData.data[i + 1]!,
+          resizedImageData.data[i + 2]!,
+        ]);
       }
     }
-
-    for (let i = 0; i < pixels.length; i++) {
-      const clusterIndex = assignments[i];
-      if (!clusterIndex) continue;
-      const cluster = clusters[clusterIndex]!;
-      imageData.data[i * 4] = cluster[0]!;
-      imageData.data[i * 4 + 1] = cluster[1]!;
-      imageData.data[i * 4 + 2] = cluster[2]!;
-    }
-
-    return clusters.map((cluster) => [
-      Math.round(cluster[0]!),
-      Math.round(cluster[1]!),
-      Math.round(cluster[2]!),
-    ]);
   }
+
+  const clusters: RGBColor[] = [];
+  for (let i = 0; i < numColors; i++) {
+    if (pixels.length === 0) break;
+    
+    clusters.push(pixels[Math.floor(Math.random() * pixels.length)]!);
+  }
+
+  let assignments: number[] = [];
+  let hasChanged = true;
+  let iteration = 0;
+  while (hasChanged && iteration < maxIterations) {
+    hasChanged = false;
+    assignments = pixels.map((pixel) => {
+      let minDistance = Infinity;
+      let clusterIndex = -1;
+      clusters.forEach((cluster, index) => {
+        const distance =
+          (cluster[0] - pixel[0]) * (cluster[0] - pixel[0]) +
+          (cluster[1] - pixel[1]) * (cluster[1] - pixel[1]) +
+          (cluster[2] - pixel[2]) * (cluster[2] - pixel[2]);
+        if (distance < minDistance) {
+          minDistance = distance;
+          clusterIndex = index;
+        }
+      });
+      return clusterIndex;
+    });
+
+    const newClusters: RGBColor[] = Array.from({ length: numColors }, () => [
+      0, 0, 0,
+    ]);
+    const counts: number[] = Array(numColors).fill(0) as number[];
+    assignments.forEach((clusterIndex, pixelIndex) => {
+      newClusters[clusterIndex]![0] += pixels[pixelIndex]![0];
+      newClusters[clusterIndex]![1] += pixels[pixelIndex]![1];
+      newClusters[clusterIndex]![2] += pixels[pixelIndex]![2];
+      counts[clusterIndex]++;
+    });
+    newClusters.forEach((cluster, index) => {
+      if (counts[index]! > 0) {
+        cluster[0] /= counts[index]!;
+        cluster[1] /= counts[index]!;
+        cluster[2] /= counts[index]!;
+      }
+    });
+
+    for (let i = 0; i < numColors; i++) {
+      if (
+        clusters[i]![0] !== newClusters[i]![0] ||
+        clusters[i]![1] !== newClusters[i]![1] ||
+        clusters[i]![2] !== newClusters[i]![2]
+      ) {
+        hasChanged = true;
+        clusters[i] = newClusters[i]!;
+      }
+    }
+    iteration++;
+  }
+
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const x = (i / 4) % imageData.width;
+    const y = Math.floor(i / 4 / imageData.width);
+    const resizedX = Math.floor(x * resizeScale);
+    const resizedY = Math.floor(y * resizeScale);
+    const resizedIndex = (resizedY * resizedImageData!.width + resizedX) * 4;
+    const clusterIndex = assignments[resizedIndex / 4];
+    if (clusterIndex !== undefined) {
+      const cluster = clusters[clusterIndex];
+      imageData.data[i] = cluster![0];
+      imageData.data[i + 1] = cluster![1];
+      imageData.data[i + 2] = cluster![2];
+    }
+  }
+
+  return clusters.map((cluster) => [
+    Math.round(cluster[0]),
+    Math.round(cluster[1]),
+    Math.round(cluster[2]),
+  ]);
+}
+
+
 
   return (
     <>
@@ -642,7 +679,7 @@ export default function Home() {
                       <div className="flex flex-col">
                         <div className="flex justify-center sm:hidden">
                           {simplifiedPalette.map((color, index) =>
-                            index < 16 &&
+                            index < 64 &&
                             index % 2 === 0 &&
                             simplifiedDarkestColor &&
                             color.toString() !==
@@ -661,7 +698,7 @@ export default function Home() {
                         </div>
                         <div className="mb-1 flex justify-center sm:hidden">
                           {simplifiedPalette.map((color, index) =>
-                            index < 16 &&
+                            index < 64 &&
                             index % 2 !== 0 &&
                             simplifiedDarkestColor &&
                             color.toString() !==
@@ -681,7 +718,7 @@ export default function Home() {
                         <div className="mt-8 hidden grid-cols-2 grid-rows-2 gap-0 sm:grid">
                           {simplifiedPalette.map(
                             (color, index) =>
-                              index < 16 &&
+                              index < 64 &&
                               simplifiedDarkestColor &&
                               color.toString() !==
                                 simplifiedDarkestColor.toString() && (
