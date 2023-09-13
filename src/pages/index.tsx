@@ -169,91 +169,167 @@ export default function Home() {
     }
   };
 
-  function grabColors(img: HTMLImageElement, count: number) {
-    const colorThief = new ColorThief();
 
-    const opts = {
-      quality: 0,
-      colorType: "array",
-    } as const;
+  function colorDistance(color1: RGBColor, color2: RGBColor): number {
+    const [r1, g1, b1] = color1;
+    const [r2, g2, b2] = color2;
 
-    //const tmpPalette = colorThief.getPalette(img, count, opts);
+    return Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2);
+  }
 
-    const canvasData = document.createElement("canvas");
-    canvasData.width = img.width;
-    canvasData.height = img.height;
 
-    const ctxData = canvasData.getContext("2d");
+function grabColors(img: HTMLImageElement, count: number) {
+  // const colorThief = new ColorThief();
 
-    if (!ctxData) {
-      throw new Error("Failed to create canvas context");
+  // const opts = {
+  //   quality: 0,
+  //   colorType: "array",
+  // } as const;
+
+  // // const mostDominantColor = colorThief.getColor(img, opts);
+  // const pallet = colorThief.getPalette(img, 2, opts);
+const colorFrequencyMap = {} as Record<string, number>;
+
+
+
+  // Create a canvas and draw the original image
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, 0, 0);
+
+  // Get image data and iterate through pixels
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+
+
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const colorString = `${imageData.data[i]},${imageData.data[i + 1]},${
+      imageData.data[i + 2]
+    }`;
+    if (colorFrequencyMap[colorString]) {
+      colorFrequencyMap[colorString] += 1;
+    } else {
+      colorFrequencyMap[colorString] = 1;
     }
-    ctxData.drawImage(img, 0, 0);
+  }
 
-    const tmpPalette =
-      count > 16
-        ? quantizeImage(
-            ctxData.getImageData(0, 0, img.width, img.height),
-            count
-          )
-        : colorThief.getPalette(img, count, opts);
+  const mostDominantColorString = Object.keys(colorFrequencyMap).reduce(
+    (a, b) => (colorFrequencyMap[a]! > colorFrequencyMap[b]! ? a : b)
+  )
 
-    const mostDominantColor = colorThief.getColor(img, opts);
+  const mostDominantColor = mostDominantColorString
+    .split(",")
+    .map((value) => parseInt(value));
+  console.log("Most Dominant Color:", mostDominantColor);
 
-    const tmpPalette2 = colorThief.getPalette(img, 200, opts);
+  const tolerance = 56; // You can adjust this value
+  const cornerRadius = 20;
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const x = (i / 4) % canvas.width;
+    const y = Math.floor(i / 4 / canvas.width);
 
-    setPalette(tmpPalette2);
-    const darkestColor = findDarkestColor(tmpPalette2 as RGBColor[]);
-    setDarkestColor(darkestColor);
-    setSimplifiedPalette(tmpPalette);
-    const simplifiedDarkestColor = findDarkestColor(tmpPalette as RGBColor[]);
-    setSimplifiedDarkestColor(simplifiedDarkestColor);
+    const originalColor: RGBColor = [
+      imageData.data[i]!,
+      imageData.data[i + 1]!,
+      imageData.data[i + 2]!,
+    ];
 
-    // Create a canvas and draw the original image
-    const canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-    const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(img, 0, 0);
+    // Check if the pixel is within the corner radius
+    const inTopLeftCorner = x < cornerRadius && y < cornerRadius;
+    const inTopRightCorner =
+      x > canvas.width - cornerRadius && y < cornerRadius;
+    const inBottomLeftCorner =
+      x < cornerRadius && y > canvas.height - cornerRadius;
+    const inBottomRightCorner =
+      x > canvas.width - cornerRadius && y > canvas.height - cornerRadius;
+    
+    if (colorDistance(mostDominantColor as [number, number, number], originalColor) <= tolerance) {
+      imageData.data[i + 3] = 0; // Set alpha to 0 (transparent)
+    } else if (
+      inTopLeftCorner ||
+      inTopRightCorner ||
+      inBottomLeftCorner ||
+      inBottomRightCorner
+    ) {
+      imageData.data[i + 3] = 0; // Set alpha to 0 (transparent)
+    }
+  }
 
-    // Iterate through the pixels and replace with the closest palette color
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      const originalColor: RGBColor = [
-        imageData.data[i]!,
-        imageData.data[i + 1]!,
-        imageData.data[i + 2]!,
-      ];
+  // After your existing loop that sets pixels to transparent based on color distance...
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const x = (i / 4) % canvas.width;
+    const y = Math.floor(i / 4 / canvas.width);
 
-      if (tmpPalette) {
-        // Check to make sure palette is defined
+    // If this pixel is transparent
+    if (imageData.data[i + 3] === 0) {
+      let nonTransparentNeighbors = 0;
 
-        const containsColor = paletteContainsColor(originalColor, tmpPalette);
+      // Check the surrounding pixels (-1 or +1 in x and y directions)
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          if (dx === 0 && dy === 0) continue;
 
-        if (
-          !containsColor &&
-          mostDominantColor.toString() !== originalColor.toString()
-        ) {
-          const closestColor = findClosestPaletteColor(
-            originalColor,
-            tmpPalette
-          );
-          if (!closestColor) continue; // Skip if no closest color found
-          imageData.data[i] = closestColor[0]!;
-          imageData.data[i + 1] = closestColor[1]!;
-          imageData.data[i + 2] = closestColor[2]!;
+          const neighborIndex = ((y + dy) * canvas.width + (x + dx)) * 4;
+          if (imageData.data[neighborIndex + 3] !== 0) {
+            nonTransparentNeighbors += 1;
+          }
         }
       }
+
+      // If there are 5 or more non-transparent neighbors, make this pixel non-transparent to smooth the edge
+      if (nonTransparentNeighbors >= 5) {
+        imageData.data[i + 3] = 255; // Set alpha to 255 (non-transparent)
+      }
     }
-    ctx.putImageData(imageData, 0, 0);
-
-    // Update the image source with the new canvas data
-
-    setSimplifiedImageSrc(canvas.toDataURL());
-    setTimeout(() => {
-      setLoader(false);
-    }, 500);
   }
+
+for (let i = 0; i < imageData.data.length; i += 4) {
+  const x = (i / 4) % canvas.width;
+  const y = Math.floor(i / 4 / canvas.width);
+
+  // If this pixel is transparent
+  if (imageData.data[i + 3] === 0) {
+    continue;
+  }
+
+  const surroundingAlphas = [];
+
+  // Check the surrounding pixels (-1 or +1 in x and y directions)
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      if (dx === 0 && dy === 0) continue;
+
+      const neighborIndex = ((y + dy) * canvas.width + (x + dx)) * 4;
+      surroundingAlphas.push(imageData.data[neighborIndex + 3]);
+    }
+  }
+
+  // Find minimum non-zero alpha in the surrounding pixels
+  const minAlpha = Math.min(...surroundingAlphas.filter((alpha) => alpha! > 0) as number[]);
+
+  // If we find a less opaque neighboring pixel, set this pixel's alpha to be an average of its current alpha and the minimum neighboring alpha
+  if (minAlpha < imageData.data[i + 3]!) {
+    imageData.data[i + 3] = (imageData.data[i + 3]! + minAlpha) / 2;
+  }
+}
+
+  
+
+  // Apply the updated image data to the canvas
+  ctx.putImageData(imageData, 0, 0);
+
+  // Update the image source with the new canvas data
+  setSimplifiedImageSrc(canvas.toDataURL());
+
+  setTimeout(() => {
+    setLoader(false);
+  }, 500);
+}
+
+
+
 
   function paletteContainsColor(color: RGBColor, palette: number[][]): boolean {
     return palette.some(
@@ -515,9 +591,9 @@ function quantizeImage(
         <img src="/smplfylogo.png" alt="logo" className="-mb-12 mt-1 w-32" />
         <div className="container flex flex-col items-center gap-12 px-4 py-16 ">
           <h1 className="justify-center text-center text-5xl font-extrabold tracking-tight text-black sm:text-[5rem]">
-            Simplify, Simplify, Simplify
+            NFT Background remover
           </h1>
-          <Button label="Manifesto" onClick={() => setOpen(!open)} />
+          {/* <Button label="Manifesto" onClick={() => setOpen(!open)} /> */}
           <input
             className="items-center justify-center rounded-md border border-black"
             type="file"
@@ -740,14 +816,14 @@ function quantizeImage(
                   <div className="flex-grow">
                     {simplifiedImageSrc && (
                       <div>
-                        <div className="-mt-0 sm:-mt-[60px]">
+                        {/* <div className="-mt-0 sm:-mt-[60px]">
                           <NumberSlider
                             imageSrc={imageSrc ?? ""}
                             simplify={simplify}
                             setSimplify={setSimplify}
                             grabColors={grabColors}
                           />
-                        </div>
+                        </div> */}
                         <div
                           className="relative flex h-screen w-screen"
                           style={{ maxWidth: "500px", maxHeight: "500px" }}
